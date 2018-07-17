@@ -1,0 +1,67 @@
+#ifndef LINEAR_PROGRAM_H
+#define LINEAR_PROGRAM_H
+
+#include <ostream>
+#include <string>
+#include <vector>
+
+#include <glpk.h>
+
+#include "Fir.h"
+
+struct SelectedFilter {
+    std::int64_t stage;
+    Fir filter;
+    double rejection;
+    std::int64_t shift;
+    std::int64_t piIn;
+    std::int64_t piFir;
+    std::int64_t piOut;
+};
+
+class LinearProgram {
+public:
+    LinearProgram(const std::int64_t nbStage, const double areaMax, const std::string &firlsFile, const std::string &fir1File, const std::string &outputFormat);
+    ~LinearProgram();
+
+    LinearProgram(const LinearProgram& other) = delete;
+    LinearProgram& operator=(const LinearProgram& other) = delete;
+
+    const std::vector<SelectedFilter> &getSelectedFilters() const;
+
+    void printDebugFile();
+    void printResults();
+    void printResults(const std::string &filename);
+
+private:
+    /*! \brief Load FIR confiuration form binary file
+     * The format of binary file is :
+     * 1) uint16 (number of coefficients)
+     * 2) uint16 (number of bit for each coefficient)
+     * 2) double (noise rejection)
+     *
+     * \param filename Binary filename
+     * \param method Algorithm used to create the coefficients
+     */
+    void loadFirConfiguration(const std::string &filename, FirMethod method);
+
+    void printResults(std::ostream &out);
+
+private:
+    std::vector<Fir> m_firs;
+
+    glp_prob *m_mip;
+
+    std::vector<int> m_constraints;
+    std::vector<int> m_variables;
+    std::vector<double> m_coefficients;
+
+    std::vector<SelectedFilter> m_selectedFilters;
+    double m_areaValue;
+    double m_rejectionValue;
+    double m_lastPi;
+
+    std::string m_outputFormat;
+};
+
+#endif // LINEAR_PROGRAM_H
