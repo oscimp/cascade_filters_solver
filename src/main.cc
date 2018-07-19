@@ -40,14 +40,14 @@ int main(int argc, char *argv[]) {
     LinearProgram lp(nbStage, areaMax, firlsFile, fir1File, outputFormat);
 
     lp.printDebugFile();
-    lp.printResults();
-    lp.printResults("sol.txt");
-
-    TclProject tcl;
-    tcl.generate(lp, outputFormat);
-
-    ScriptGenerator::generateDeployScript(lp, outputFormat);
-    ScriptGenerator::generateSimulationScript(lp, outputFormat);
+    // lp.printResults();
+    // lp.printResults("sol.txt");
+    //
+    // TclProject tcl;
+    // tcl.generate(lp, outputFormat);
+    //
+    // ScriptGenerator::generateDeployScript(lp, outputFormat);
+    // ScriptGenerator::generateSimulationScript(lp, outputFormat);
 
     return 0;
 }

@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <glpk.h>
+#include <gurobi_c++.h>
 
 #include "Fir.h"
 
@@ -22,10 +22,10 @@ struct SelectedFilter {
 class LinearProgram {
 public:
     LinearProgram(const std::int64_t nbStage, const double areaMax, const std::string &firlsFile, const std::string &fir1File, const std::string &outputFormat);
-    ~LinearProgram();
-
-    LinearProgram(const LinearProgram& other) = delete;
-    LinearProgram& operator=(const LinearProgram& other) = delete;
+    // ~LinearProgram();
+    //
+    // LinearProgram(const LinearProgram& other) = delete;
+    // LinearProgram& operator=(const LinearProgram& other) = delete;
 
     const std::vector<SelectedFilter> &getSelectedFilters() const;
 
@@ -50,16 +50,20 @@ private:
 private:
     std::vector<Fir> m_firs;
 
-    glp_prob *m_mip;
-
-    std::vector<int> m_constraints;
-    std::vector<int> m_variables;
-    std::vector<double> m_coefficients;
+    GRBEnv m_env;
+    GRBModel m_model;
+    std::vector< std::vector<GRBVar> > m_var_delta;
+    std::vector< std::vector<GRBVar> > m_var_pi_fir;
+    std::vector<GRBVar> m_var_pi_s;
+    std::vector<GRBVar> m_var_a;
+    std::vector<GRBVar> m_var_r;
+    std::vector<GRBVar> m_var_pi;
+    GRBVar m_var_PI_IN;
 
     std::vector<SelectedFilter> m_selectedFilters;
-    double m_areaValue;
-    double m_rejectionValue;
-    double m_lastPi;
+    // double m_areaValue;
+    // double m_rejectionValue;
+    // double m_lastPi;
 
     std::string m_outputFormat;
 };

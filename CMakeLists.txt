@@ -21,12 +21,11 @@ find_package(Gurobi REQUIRED)
 include_directories(${GUROBI_INCLUDE_DIR})
 
 add_executable(fir-solver
-    src/mip1_c++.cc
-    # src/main.cc
-    # src/local/Fir.cc
-    # src/local/LinearProgram.cc
-    # src/local/ScriptGenerator.cc
-    # src/local/TclProject.cc
+    src/main.cc
+    src/local/Fir.cc
+    src/local/LinearProgram.cc
+    src/local/ScriptGenerator.cc
+    src/local/TclProject.cc
 )
 
 target_link_libraries(fir-solver
