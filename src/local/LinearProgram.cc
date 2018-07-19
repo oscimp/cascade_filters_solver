@@ -6,10 +6,14 @@
 
 LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, const std::string &firlsFile, const std::string &fir1File, const std::string &outputFormat)
 : m_env(GRBEnv())
-, m_model(m_env) {
+, m_model(m_env)
+, m_areaValue(0.0)
+, m_rejectionValue(0.0)
+, m_lastPi(0.0)
+, m_outputFormat(outputFormat) {
     // Load firls coeffcients
     loadFirConfiguration(firlsFile, FirMethod::FirLS);
-    // loadFirConfiguration(fir1File, FirMethod::Fir1);
+    loadFirConfiguration(fir1File, FirMethod::Fir1);
 
     // Déclaration des constantes internes
     const std::int64_t NbConfFir = m_firs.size();
@@ -200,48 +204,40 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
         m_model.setObjective(expr, GRB_MAXIMIZE);
     }
 
+    // Execute le programme linéaire
     m_model.optimize();
-//
-//     // Execute le programme linéaire
-//     glp_load_matrix(m_mip, m_coefficients.size() - 1, m_constraints.data(), m_variables.data(), m_coefficients.data());
-//     glp_simplex(m_mip, nullptr);
-//     glp_intopt(m_mip, nullptr);
-//
-//     // Sauvegarde le choix des filtres
-//     for (std::int64_t i = 0; i < NbStage; ++i) {
-//         for (std::int64_t j = 0; j < NbConfFir; ++j) {
-//             if (glp_mip_col_val(m_mip, var_delta(i, j)) == 1) {
-//                 double rejection = glp_mip_col_val(m_mip, var_r(i));
-//                 std::int64_t piIn = 0;
-//                 if (i == 0) {
-//                     piIn = glp_mip_col_val(m_mip, var_PI_IN);
-//                 }
-//                 else {
-//                     piIn = glp_mip_col_val(m_mip, var_pi(i - 1));
-//                 }
-//                 std::int64_t piFir = glp_mip_col_val(m_mip, var_pi_fir(i, j));
-//                 std::int64_t piOut = glp_mip_col_val(m_mip, var_pi(i));
-//                 std::int64_t shift = glp_mip_col_val(m_mip, var_pi_s(i));
-//                 SelectedFilter filter = { i + 1, m_firs[j], rejection, shift, piIn, piFir, piOut };
-//                 m_selectedFilters.emplace_back(filter);
-//                 break;
-//             }
-//         }
-//     }
-//
-//     // Calcul des valeurs importantes
-//     for (std::int64_t i = 0; i < NbStage; ++i) {
-//         m_areaValue += glp_mip_col_val(m_mip, var_a(i));
-//         m_rejectionValue += glp_mip_col_val(m_mip, var_r(i));
-//     }
-//     m_lastPi = glp_mip_col_val(m_mip, var_pi(NbStage - 1));
-}
 
-// LinearProgram::~LinearProgram() {
-//     // if (m_mip != nullptr) {
-//     //     glp_delete_prob(m_mip);
-//     // }
-// }
+    for (int i = 0; i < NbStage; ++i) {
+        for (int j = 0; j < NbConfFir; ++j) {
+            bool selected = static_cast<bool>(std::round(m_var_delta[i][j].get(GRB_DoubleAttr_X)));
+
+            if (selected) {
+                Fir &fir = m_firs[j];
+                double rejection = m_var_r[i].get(GRB_DoubleAttr_X);
+                std::int64_t shift = m_var_pi_s[i].get(GRB_DoubleAttr_X);
+                std::int64_t piIn = 0;
+                if (i == 0) {
+                    piIn = m_var_PI_IN.get(GRB_DoubleAttr_X);
+                }
+                else {
+                    piIn = m_var_pi[i - 1].get(GRB_DoubleAttr_X);
+                }
+                std::int64_t piFir = m_var_pi_fir[i][j].get(GRB_DoubleAttr_X);
+                std::int64_t piOut = m_var_pi[i].get(GRB_DoubleAttr_X);
+
+                SelectedFilter filter = { i, fir, rejection, shift, piIn, piFir, piOut };
+                m_selectedFilters.emplace_back(filter);
+            }
+        }
+    }
+
+    // Calcul des valeurs importantes
+    for (std::int64_t i = 0; i < NbStage; ++i) {
+        m_areaValue += m_var_a[i].get(GRB_DoubleAttr_X);
+        m_rejectionValue += m_var_r[i].get(GRB_DoubleAttr_X);
+    }
+    m_lastPi = m_var_pi[NbStage - 1].get(GRB_DoubleAttr_X);
+}
 
 const std::vector<SelectedFilter> &LinearProgram::getSelectedFilters() const {
     return m_selectedFilters;
@@ -251,13 +247,10 @@ void LinearProgram::printDebugFile() {
     std::cout << std::endl;
     std::cout << "### Write the linear programm and the solution ###" << std::endl;
     m_model.update();
-    m_model.write("debug.lp");
-    // std::cout << std::endl;
-    // std::cout << "### Write the linear programm and the solution ###" << std::endl;
-    //
-    // std::string filename = m_outputFormat + "/glpk_lp.txt";
-    // glp_write_lp(m_mip, NULL, filename.c_str());
-    //
+
+    std::string filename = m_outputFormat + "/gurobi.lp";
+    m_model.write(filename);
+
     // filename = m_outputFormat + "/glpk_lp_sol.txt";
     // glp_print_sol(m_mip, filename.c_str());
     //
@@ -308,25 +301,27 @@ void LinearProgram::loadFirConfiguration(const std::string &filename, FirMethod 
 }
 
 void LinearProgram::printResults(std::ostream &out) {
-    // out << std::endl;
-    // out << "### Main criteria ###" << std::endl;
-    // out << "Objectif = " << glp_mip_obj_val(m_mip) << std::endl;
-    // out << "Area = " << m_areaValue << std::endl;
-    // out << "Rejection = " << m_rejectionValue << std::endl;
-    // out << "Last pi_i = " << m_lastPi << std::endl;
-    //
-    // out << std::endl;
-    // out << "### Selected filters ###" << std::endl;
-    // int i = 0;
-    // for (const SelectedFilter &filter: m_selectedFilters) {
-    //     out << "Stage #" << filter.stage << std::endl;
-    //     out << filter.filter << std::endl;
-    //     out << "pi_in: " << filter.piIn << std::endl;
-    //     out << "pi_fir: " << filter.piFir << std::endl;
-    //     out << "pi_out: " << filter.piOut << std::endl;
-    //     out << "r_i: " << filter.rejection << std::endl;
-    //     out << "r_i/6: " << filter.rejection / 6.0 << std::endl;
-    //     out << "With shift: " << filter.shift << std::endl;
-    //     ++i;
-    // }
+    m_model.update();
+
+    out << std::endl;
+    out << "### Main criteria ###" << std::endl;
+    out << "Objectif = " << m_model.get(GRB_DoubleAttr_ObjVal) << std::endl;
+    out << "Area = " << m_areaValue << std::endl;
+    out << "Rejection = " << m_rejectionValue << std::endl;
+    out << "Last pi_i = " << m_lastPi << std::endl;
+
+    out << std::endl;
+    out << "### Selected filters ###" << std::endl;
+    int i = 0;
+    for (const SelectedFilter &filter: m_selectedFilters) {
+        out << "Stage #" << filter.stage << std::endl;
+        out << filter.filter << std::endl;
+        out << "pi_in: " << filter.piIn << std::endl;
+        out << "pi_fir: " << filter.piFir << std::endl;
+        out << "pi_out: " << filter.piOut << std::endl;
+        out << "r_i: " << filter.rejection << std::endl;
+        out << "r_i/6: " << filter.rejection / 6.0 << std::endl;
+        out << "With shift: " << filter.shift << std::endl;
+        ++i;
+    }
 }

@@ -22,10 +22,6 @@ struct SelectedFilter {
 class LinearProgram {
 public:
     LinearProgram(const std::int64_t nbStage, const double areaMax, const std::string &firlsFile, const std::string &fir1File, const std::string &outputFormat);
-    // ~LinearProgram();
-    //
-    // LinearProgram(const LinearProgram& other) = delete;
-    // LinearProgram& operator=(const LinearProgram& other) = delete;
 
     const std::vector<SelectedFilter> &getSelectedFilters() const;
 
@@ -61,9 +57,9 @@ private:
     GRBVar m_var_PI_IN;
 
     std::vector<SelectedFilter> m_selectedFilters;
-    // double m_areaValue;
-    // double m_rejectionValue;
-    // double m_lastPi;
+    double m_areaValue;
+    double m_rejectionValue;
+    double m_lastPi;
 
     std::string m_outputFormat;
 };
