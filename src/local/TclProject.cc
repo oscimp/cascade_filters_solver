@@ -281,6 +281,6 @@ void TclProject::writeTclFooter(std::ofstream &file, int inputSize, std::string 
 
     file << "# export usage" << std::endl;
     file << "open_run impl_1" << std::endl;
-    file << "report_utilization -hierarchical -hierarchical_depth 1 -file " << outputFormat << "_usage_ressources.txt" << std::endl;
+    file << "report_utilization -hierarchical -hierarchical_depth 1 -file " << outputFormat << "/" << outputFormat << "_usage_ressources.txt" << std::endl;
     file << "exit" << std::endl;
 }
