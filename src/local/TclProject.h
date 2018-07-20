@@ -14,7 +14,7 @@ public:
 private:
     void generateProjectFile(const LinearProgram &lp, const std::string &outputFormat);
     void writeTclHeader(std::ofstream &file, const std::string &outputFormat);
-    int addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &filter, int inputSize, std::string &previousSource);
+    int addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &filter, std::string &previousSource);
     void writeTclFooter(std::ofstream &file, int inputSize, std::string &previousSource, const std::string &outputFormat);
 
 private:

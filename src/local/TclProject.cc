@@ -34,15 +34,15 @@ void TclProject::generateProjectFile(const LinearProgram &lp, const std::string 
     auto filters = lp.getSelectedFilters();
     std::string previousSource = "$initial_source";
     int firNumber = 0;
-    int inputSize = 16;
+    std::int64_t lastOutputSize = 0;
 
     for (const auto filter: filters) {
-        inputSize = addTclFir(file, firNumber, filter, inputSize, previousSource);
+        lastOutputSize = addTclFir(file, firNumber, filter, previousSource);
         ++firNumber;
     }
 
     // Write the footer
-    writeTclFooter(file, inputSize, previousSource, outputFormat);
+    writeTclFooter(file, lastOutputSize, previousSource, outputFormat);
 }
 
 void TclProject::writeTclHeader(std::ofstream &file, const std::string &outputFormat) {
@@ -137,9 +137,8 @@ void TclProject::writeTclHeader(std::ofstream &file, const std::string &outputFo
     file << std::endl;
 }
 
-int TclProject::addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &filter, int inputSize, std::string &previousSource) {
+int TclProject::addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &filter, std::string &previousSource) {
     Fir fir = filter.filter;
-    int outputSize = inputSize + fir.getPiC() + std::ceil(std::log2(fir.getCardC()));
     std::string firName = "fir_" + std::to_string(firNumber);
 
     file << "# Create fir" << std::endl;
@@ -150,8 +149,8 @@ int TclProject::addTclFir(std::ofstream &file, int firNumber, const SelectedFilt
     file << "        CONFIG.NB_COEFF {" << std::to_string(fir.getCardC()) << "} \\" << std::endl;
     file << "        CONFIG.DECIMATE_FACTOR {1} \\" << std::endl;
     file << "        CONFIG.COEFF_SIZE {" << std::to_string(fir.getPiC()) << "} \\" << std::endl;
-    file << "        CONFIG.DATA_IN_SIZE {" << std::to_string(inputSize) << "} \\" << std::endl;
-    file << "        CONFIG.DATA_OUT_SIZE {" << std::to_string(outputSize) << "} ] $" << firName << std::endl;
+    file << "        CONFIG.DATA_IN_SIZE {" << std::to_string(filter.piIn) << "} \\" << std::endl;
+    file << "        CONFIG.DATA_OUT_SIZE {" << std::to_string(filter.piIn + filter.piFir) << "} ] $" << firName << std::endl;
     file << std::endl;
     file << "    # Automation for AXI" << std::endl;
     file << "    apply_bd_automation -rule xilinx.com:bd_rule:axi4 \\" << std::endl;
@@ -170,7 +169,7 @@ int TclProject::addTclFir(std::ofstream &file, int firNumber, const SelectedFilt
 
     if (filter.shift == 0) {
         previousSource = "$fir_" + std::to_string(firNumber) + "/data_out";
-        return outputSize;
+        return filter.piOut;
     }
 
     std::string shifterName = "shifter_" + std::to_string(firNumber);
@@ -179,8 +178,8 @@ int TclProject::addTclFir(std::ofstream &file, int firNumber, const SelectedFilt
     file << "    # Create the block and configure it" << std::endl;
     file << "    set " << shifterName << " [ create_bd_cell -type ip -vlnv ggm:cogen:shifterReal:1.0 " << shifterName << " ]" << std::endl;
     file << "    set_property -dict [ list \\" << std::endl;
-    file << "        CONFIG.DATA_OUT_SIZE {" << outputSize - filter.shift << "} \\" << std::endl;
-    file << "        CONFIG.DATA_IN_SIZE {" << outputSize << "} ] $" << shifterName << std::endl;
+    file << "        CONFIG.DATA_OUT_SIZE {" << filter.piOut << "} \\" << std::endl;
+    file << "        CONFIG.DATA_IN_SIZE {" << (filter.piIn + filter.piFir) << "} ] $" << shifterName << std::endl;
     file << std::endl;
     file << "    # Connect input data" << std::endl;
     file << "    connect_bd_intf_net\\" << std::endl;
@@ -193,7 +192,7 @@ int TclProject::addTclFir(std::ofstream &file, int firNumber, const SelectedFilt
     file << std::endl;
 
     previousSource = "$shifter_" + std::to_string(firNumber) + "/data_out";
-    return outputSize - filter.shift;
+    return filter.piOut;
 }
 
 void TclProject::writeTclFooter(std::ofstream &file, int inputSize, std::string &previousSource, const std::string &outputFormat) {
