@@ -281,5 +281,9 @@ void TclProject::writeTclFooter(std::ofstream &file, int inputSize, std::string 
     file << "# export usage" << std::endl;
     file << "open_run impl_1" << std::endl;
     file << "report_utilization -hierarchical -hierarchical_depth 1 -file " << outputFormat << "/" << outputFormat << "_usage_ressources.txt" << std::endl;
+    file << std::endl;
+
+    file << "# Copy the bitstream" << std::endl;
+    file << "file copy -force /tmp/" << outputFormat << "/" << outputFormat << ".runs/impl_1/" << outputFormat << "_wrapper.bit " << outputFormat << "/" << outputFormat << "_wrapper.bit" << std::endl;
     file << "exit" << std::endl;
 }
