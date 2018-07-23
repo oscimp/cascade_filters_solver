@@ -139,7 +139,9 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
         }
 
         // Minumum de bit pour voir la rejection
-        expr -= (1.0/6.0) * m_var_r[i];
+        for (int stage = 0; stage < NbStage; ++stage) {
+            expr -= (1.0/6.0) * m_var_r[stage];
+        }
 
         // Récupération de la taille d'entrée des données
         if (i == 0) {
