@@ -25,6 +25,7 @@ add_executable(fir-solver
     src/local/Fir.cc
     src/local/LinearProgram.cc
     src/local/ScriptGenerator.cc
+    src/local/TclADC.cc
     src/local/TclPRN.cc
     src/local/TclProject.cc
 )
