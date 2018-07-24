@@ -11,13 +11,13 @@ class TclProject {
 public:
     void generate(const LinearProgram &lp, const std::string &outputFormat);
 
-private:
+protected:
     void generateProjectFile(const LinearProgram &lp, const std::string &outputFormat);
-    void writeTclHeader(std::ofstream &file, const std::string &outputFormat);
+    virtual void writeTclHeader(std::ofstream &file, const std::string &outputFormat) = 0;
     int addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &filter, std::string &previousSource);
-    void writeTclFooter(std::ofstream &file, int inputSize, std::string &previousSource, const std::string &outputFormat);
+    virtual void writeTclFooter(std::ofstream &file, int inputSize, std::string &previousSource, const std::string &outputFormat) = 0;
 
-private:
+protected:
     std::string m_fpgaDevPath;
 };
 
