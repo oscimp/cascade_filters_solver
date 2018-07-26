@@ -2,11 +2,12 @@
 
 #include <cmath>
 
-Fir::Fir(FirMethod method, std::uint16_t cardC, std::uint16_t piC, double noiseLevel)
+Fir::Fir(FirMethod method, std::uint16_t cardC, std::uint16_t piC, double noiseLevel, std::int16_t realPiOut)
 : m_method(method)
 , m_cardC(cardC)
 , m_piC(piC)
-, m_noiseLevel(noiseLevel) {
+, m_noiseLevel(noiseLevel)
+, m_realPiOut(realPiOut) {
     // ctor
 }
 
@@ -26,8 +27,8 @@ FirMethod Fir::getMethod() const {
     return m_method;
 }
 
-std::int64_t Fir::getPiOut(std::int64_t piIn) const {
-    return getPiC() + std::ceil(std::log2(getCardC())) + piIn;
+std::int64_t Fir::getPiOut() const {
+    return m_realPiOut;
 }
 
 std::ostream& operator<<(std::ostream& os, const Fir& fir) {
@@ -42,6 +43,6 @@ std::ostream& operator<<(std::ostream& os, const Fir& fir) {
         break;
     }
 
-    os << "fir('" << methodString << "', |C|:" << fir.m_cardC << ", log2(C):" << fir.m_piC << ", " << fir.m_noiseLevel << " dB)";
+    os << "fir('" << methodString << "', |C|:" << fir.m_cardC << ", log2(C):" << fir.m_piC << ", " << fir.m_noiseLevel << " dB, PiFir: " << fir.m_realPiOut << " bit)";
     return os;
 }
