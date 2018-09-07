@@ -11,7 +11,7 @@ enum class FirMethod {
 
 class Fir {
 public:
-    Fir(FirMethod method, std::uint16_t cardC, std::uint16_t piC, double noiseLevel, std::int16_t realPiOut);
+    Fir(FirMethod method, std::uint16_t cardC, std::uint16_t piC, double noiseLevel);
 
     std::uint64_t getPiC() const;
     std::uint64_t getCardC() const;

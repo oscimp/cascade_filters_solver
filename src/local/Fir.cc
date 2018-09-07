@@ -2,12 +2,12 @@
 
 #include <cmath>
 
-Fir::Fir(FirMethod method, std::uint16_t cardC, std::uint16_t piC, double noiseLevel, std::int16_t realPiOut)
+Fir::Fir(FirMethod method, std::uint16_t cardC, std::uint16_t piC, double noiseLevel)
 : m_method(method)
 , m_cardC(cardC)
 , m_piC(piC)
 , m_noiseLevel(noiseLevel)
-, m_realPiOut(realPiOut) {
+, m_realPiOut(piC) {
     // ctor
 }
 
@@ -43,6 +43,6 @@ std::ostream& operator<<(std::ostream& os, const Fir& fir) {
         break;
     }
 
-    os << "fir('" << methodString << "', |C|:" << fir.m_cardC << ", log2(C):" << fir.m_piC << ", " << fir.m_noiseLevel << " dB, PiFir: " << fir.m_realPiOut << " bit)";
+    os << "fir('" << methodString << "', C:" << fir.m_cardC << ", PiC:" << fir.m_piC << ", " << fir.m_noiseLevel << " dB, PiFir: " << fir.m_realPiOut << " bit)";
     return os;
 }

@@ -286,13 +286,11 @@ void LinearProgram::loadFirConfiguration(const std::string &filename, FirMethod 
         std::uint16_t nob = 0;
         std::uint16_t coeff = 0;
         double rejection = 0.0;
-        std::uint16_t piFir = 0;
 
         // Read the values
         file.read(reinterpret_cast<char*>(&nob), sizeof(std::uint16_t));
         file.read(reinterpret_cast<char*>(&coeff), sizeof(std::uint16_t));
         file.read(reinterpret_cast<char*>(&rejection), sizeof(double));
-        file.read(reinterpret_cast<char*>(&piFir), sizeof(std::uint16_t));
 
         // If the end of file is reached
         if (file.eof()) {
@@ -300,7 +298,7 @@ void LinearProgram::loadFirConfiguration(const std::string &filename, FirMethod 
         }
 
         // Add fir configuration
-        m_firs.emplace_back(method, coeff, nob, rejection, piFir);
+        m_firs.emplace_back(method, coeff, nob, rejection);
     }
 }
 
