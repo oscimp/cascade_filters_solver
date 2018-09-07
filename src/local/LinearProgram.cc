@@ -159,7 +159,7 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
         for (std::int64_t j = 0; j < NbConfFir; ++j) {
             const Fir &currentFir = m_firs[j];
             std::string cstrName = "cstr_pi_fir_" + std::to_string(i) + "_" + std::to_string(j);
-            m_model.addConstr(m_var_delta[i][j] * currentFir.getPiOut() - m_var_pi_fir[i][j] == 0, cstrName);
+            m_model.addConstr(m_var_delta[i][j] * currentFir.getPiC() - m_var_pi_fir[i][j] == 0, cstrName);
         }
     }
 
