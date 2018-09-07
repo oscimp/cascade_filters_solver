@@ -8,7 +8,7 @@ void ScriptGenerator::generateDeployScript(const LinearProgram &lp, const std::s
     std::ofstream file = createShellFile(scriptFilename);
 
     // Copy the write_bitstream
-    safeShellCommand(file, "cp /tmp/" + outputFormat + "/" + outputFormat + ".runs/impl_1/" + outputFormat + "_wrapper.bit /tmp/" + outputFormat + ".bit");
+    safeShellCommand(file, "cp " + outputFormat + "/" + outputFormat + "_wrapper.bit /tmp/" + outputFormat + ".bit");
 
     // Create the the bif script
     file << "echo \"all:\" > /tmp/" + outputFormat + ".bif" << std::endl;
