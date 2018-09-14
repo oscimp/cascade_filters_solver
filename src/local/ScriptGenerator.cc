@@ -2,7 +2,7 @@
 
 #include "LinearProgram.h"
 
-void ScriptGenerator::generateDeployScript(const LinearProgram &lp, const std::string &outputFormat) {
+void ScriptGenerator::generateDeployScript(const LinearProgram &lp, const std::string &outputFormat, const std::string dtboType) {
     std::string scriptFilename = outputFormat + "/" + outputFormat + ".sh";
 
     std::ofstream file = createShellFile(scriptFilename);
@@ -34,7 +34,7 @@ void ScriptGenerator::generateDeployScript(const LinearProgram &lp, const std::s
     // Select the right overlays
     auto selectedFilters = lp.getSelectedFilters();
     std::size_t nbStage = selectedFilters.size();
-    safeShellCommand(file, "ssh root@redpitaya \"cat /usr/local/share/dtbo/chain-filter-" + std::to_string(nbStage) + ".dtbo > /sys/kernel/config/device-tree/overlays/prn/dtbo\"");
+    safeShellCommand(file, "ssh root@redpitaya \"cat /usr/local/share/dtbo/" + dtboType +"/chain-filter-" + std::to_string(nbStage) + ".dtbo > /sys/kernel/config/device-tree/overlays/prn/dtbo\"");
 
     // Configure the filters
     std::string filterList = "";
@@ -56,8 +56,12 @@ void ScriptGenerator::generateDeployScript(const LinearProgram &lp, const std::s
     }
     safeShellCommand(file, "ssh root@redpitaya \"/usr/local/bin/prn_fir_loader_us" + filterList + "\"");
 
-    // Get all the data
+    // Generate all the data
     safeShellCommand(file, "ssh root@redpitaya \"/usr/local/bin/prn_data_retreiver_us\"");
+
+    // Retrive data
+    safeShellCommand(file, "scp root@redpitaya:~/data_prn.bin " + outputFormat + "/data_" + dtboType + ".bin");
+    safeShellCommand(file, "scp root@redpitaya:~/data_fir.bin " + outputFormat + "/data_" + std::to_string(nbStage) + "_fir.bin");
 }
 
 void ScriptGenerator::generateSimulationScript(const LinearProgram &lp, const std::string &outputFormat) {

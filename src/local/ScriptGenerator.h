@@ -7,7 +7,7 @@ class LinearProgram;
 
 class ScriptGenerator {
 public:
-    static void generateDeployScript(const LinearProgram &lp, const std::string &outputFormat);
+    static void generateDeployScript(const LinearProgram &lp, const std::string &outputFormat, const std::string dtboType);
     static void generateSimulationScript(const LinearProgram &lp, const std::string &outputFormat);
 
 private:
