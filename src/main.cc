@@ -4,7 +4,7 @@
 
 #include "local/LinearProgram.h"
 #include "local/ScriptGenerator.h"
-#include "local/TclPRN.h"
+#include "local/TclADC.h"
 
 static bool createDirectory(const std::string &path) {
     const int dir_err = ::mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -43,10 +43,10 @@ int main(int argc, char *argv[]) {
     lp.printResults();
     lp.printResults("sol.txt");
 
-    TclPRN tcl;
+    TclADC tcl;
     tcl.generate(lp, outputFormat);
 
-    ScriptGenerator::generateDeployScript(lp, outputFormat);
+    ScriptGenerator::generateDeployScript(lp, outputFormat, "adc");
     ScriptGenerator::generateSimulationScript(lp, outputFormat);
 
     return 0;

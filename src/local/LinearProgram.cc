@@ -18,7 +18,7 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
     // Déclaration des constantes internes
     const std::int64_t NbConfFir = m_firs.size();
     const std::int64_t NbStage = nbStage;
-    const std::int64_t PiIn = 16;
+    const std::int64_t PiIn = 7;
     const std::int64_t PiMax = 256;
     const double AMax = areaMax;
 
