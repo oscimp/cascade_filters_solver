@@ -233,7 +233,6 @@ void TclADC::writeTclFooter(std::ofstream &file, int inputSize, std::string &pre
     file << "       Master {/processing_system7_0/M_AXI_GP0} Slave {/data64_1_voie_to_ram_0/s00_axi}\\" << std::endl;
     file << "       intc_ip {/ps7_0_axi_periph} master_apm {0}}  [get_bd_intf_pins $ram_fir/s00_axi]" << std::endl;
     file << "   connect_bd_intf_net [get_bd_intf_pins $ram_fir/data_in] [get_bd_intf_pins " << previousSource << "]" << std::endl;
-    file << "   connect_bd_net [get_bd_pins $ps7/FCLK_CLK0] [get_bd_pins $ram_fir/processing_clk_i]" << std::endl;
     file << "endgroup" << std::endl;
     file << std::endl;
 
@@ -246,7 +245,6 @@ void TclADC::writeTclFooter(std::ofstream &file, int inputSize, std::string &pre
     file << "       Master {/processing_system7_0/M_AXI_GP0} Slave {/data64_1_voie_to_ram_1/s00_axi}\\" << std::endl;
     file << "       intc_ip {/ps7_0_axi_periph} master_apm {0}}  [get_bd_intf_pins $ram_prn/s00_axi]" << std::endl;
     file << "   connect_bd_intf_net [get_bd_intf_pins $ram_prn/data_in] [get_bd_intf_pins $expander_adc_raw_data/data_out]" << std::endl;
-    file << "   connect_bd_net [get_bd_pins $ps7/FCLK_CLK0] [get_bd_pins $ram_prn/processing_clk_i]" << std::endl;
     file << "endgroup" << std::endl;
     file << std::endl;
 
