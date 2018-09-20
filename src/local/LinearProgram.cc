@@ -151,6 +151,9 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
             expr += m_var_pi[i-1];
         }
 
+        // Ajout d'un bit de sécurité
+        expr += 1;
+
         m_model.addConstr(expr, GRB_GREATER_EQUAL, 0.0, cstrName);
     }
 
