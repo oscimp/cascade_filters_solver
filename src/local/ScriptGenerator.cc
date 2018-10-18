@@ -34,7 +34,7 @@ void ScriptGenerator::generateDeployScript(const LinearProgram &lp, const std::s
     // Select the right overlays
     auto selectedFilters = lp.getSelectedFilters();
     std::size_t nbStage = selectedFilters.size();
-    safeShellCommand(file, "ssh root@redpitaya \"cat /usr/local/share/dtbo/" + dtboType +"/chain-filter-" + std::to_string(nbStage) + ".dtbo > /sys/kernel/config/device-tree/overlays/prn/dtbo\"");
+    safeShellCommand(file, "ssh root@redpitaya \"cat /usr/local/share/dtbo/" + dtboType +"/chain-filter-" + std::to_string(nbStage) + ".dtbo > /sys/kernel/config/device-tree/overlays/prn/dtbo; sleep 1\"");
 
     // Configure the filters
     std::string filterList = "";
