@@ -18,7 +18,8 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
     // Déclaration des constantes internes
     const std::int64_t NbConfFir = m_firs.size();
     const std::int64_t NbStage = nbStage;
-    const std::int64_t PiIn = 7;
+    const std::int64_t PiIn = 16; // PRN input
+    // const std::int64_t PiIn = 7; // ADC input
     const std::int64_t PiMax = 256;
     const double AMax = areaMax;
 
@@ -125,36 +126,36 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
         m_model.addConstr(expr, GRB_EQUAL, 0.0, cstrName);
     }
 
-    // Contraintes sur pi_s
+    // Contrainte sur la taille en sortie
     for (std::int64_t i = 0; i < NbStage; ++i) {
-        std::string cstrName = "cstr_pi_s_" + std::to_string(i);
+        std::string cstrName = "cstr_pi_i_out_" + std::to_string(i);
         GRBLinExpr expr = 0;
 
-        // Affectation de la contrainte à pi_s
-        expr -= m_var_pi_s[i];
+        // Somme des rejections précédentes (avec shift)
+        for (int stage = 0; stage <= i; ++stage) {
+            expr += (1.0/6.0) * m_var_r[stage];
 
-        // Taille des données à la sortie du filtre
-        for (std::int64_t j = 0; j < NbConfFir; ++j) {
-            expr += m_var_pi_fir[i][j];
-        }
-
-        // Minumum de bit pour voir la rejection
-        for (int stage = 0; stage < NbStage; ++stage) {
-            expr -= (1.0/6.0) * m_var_r[stage];
-        }
-
-        // Récupération de la taille d'entrée des données
-        if (i == 0) {
-            expr += m_var_PI_IN;
-        }
-        else {
-            expr += m_var_pi[i-1];
+            // // Ajout d'un bit de sécurité par étage
+            // expr += 1;
         }
 
         // Ajout d'un bit de sécurité
         expr += 1;
 
-        m_model.addConstr(expr, GRB_GREATER_EQUAL, 0.0, cstrName);
+        // // Taille égale à la sortie du fir => pas de shift
+        // if (i == 0) {
+        //     expr += m_var_PI_IN;
+        // }
+        // else {
+        //     expr += m_var_pi[i-1];
+        // }
+        //
+        // // Taille des données à la sortie du filtre
+        // for (std::int64_t j = 0; j < NbConfFir; ++j) {
+        //     expr += m_var_pi_fir[i][j];
+        // }
+
+        m_model.addConstr(expr, GRB_LESS_EQUAL, m_var_pi[i], cstrName);
     }
 
     // Définition de pi_fir
@@ -162,7 +163,7 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
         for (std::int64_t j = 0; j < NbConfFir; ++j) {
             const Fir &currentFir = m_firs[j];
             std::string cstrName = "cstr_pi_fir_" + std::to_string(i) + "_" + std::to_string(j);
-            m_model.addConstr(m_var_delta[i][j] * currentFir.getPiC() - m_var_pi_fir[i][j] == 0, cstrName);
+            m_model.addConstr(m_var_delta[i][j] * (currentFir.getPiC() + 1) - m_var_pi_fir[i][j] == 0, cstrName);
         }
     }
 
@@ -219,16 +220,16 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
             if (selected) {
                 Fir &fir = m_firs[j];
                 double rejection = m_var_r[i].get(GRB_DoubleAttr_X);
-                std::int64_t shift = m_var_pi_s[i].get(GRB_DoubleAttr_X);
+                std::int64_t shift = std::round(m_var_pi_s[i].get(GRB_DoubleAttr_X));
                 std::int64_t piIn = 0;
                 if (i == 0) {
-                    piIn = m_var_PI_IN.get(GRB_DoubleAttr_X);
+                    piIn = std::round(m_var_PI_IN.get(GRB_DoubleAttr_X));
                 }
                 else {
-                    piIn = m_var_pi[i - 1].get(GRB_DoubleAttr_X);
+                    piIn = std::round(m_var_pi[i - 1].get(GRB_DoubleAttr_X));
                 }
-                std::int64_t piFir = m_var_pi_fir[i][j].get(GRB_DoubleAttr_X);
-                std::int64_t piOut = m_var_pi[i].get(GRB_DoubleAttr_X);
+                std::int64_t piFir = std::round(m_var_pi_fir[i][j].get(GRB_DoubleAttr_X));
+                std::int64_t piOut = std::round(m_var_pi[i].get(GRB_DoubleAttr_X));
 
                 SelectedFilter filter = { i, fir, rejection, shift, piIn, piFir, piOut };
                 m_selectedFilters.emplace_back(filter);
@@ -327,6 +328,7 @@ void LinearProgram::printResults(std::ostream &out) {
         out << "r_i: " << filter.rejection << std::endl;
         out << "r_i/6: " << filter.rejection / 6.0 << std::endl;
         out << "With shift: " << filter.shift << std::endl;
+        out << "Stage rejection: " << m_var_r[i].get(GRB_DoubleAttr_X) << std::endl;
         ++i;
     }
 }

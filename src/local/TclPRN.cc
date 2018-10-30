@@ -61,27 +61,27 @@ void TclPRN::writeTclHeader(std::ofstream &file, const std::string &outputFormat
     file << "endgroup" << std::endl;
     file << std::endl;
 
-    file << "# Create splitter to raw data and processed data" << std::endl;
+    file << "# Create PNR shifter for the PRN data" << std::endl;
     file << "startgroup" << std::endl;
-    file << "   set splitter_raw_data [ create_bd_cell -type ip -vlnv ggm:cogen:dupplReal_1_to_2:1.0 dupplReal_1_to_2_0 ]" << std::endl;
-    file << "   set_property -dict [list CONFIG.DATA_SIZE {20}] $splitter_raw_data" << std::endl;
-    file << "   connect_bd_intf_net [get_bd_intf_pins $splitter_raw_data/data_in] [get_bd_intf_pins $prn/prn_full_out]" << std::endl;
+    file << "   set shifter_prn_data [ create_bd_cell -type ip -vlnv ggm:cogen:shifterReal:1.0 shifterReal_0 ]" << std::endl;
+    file << "   set_property -dict [list CONFIG.DATA_OUT_SIZE {16} CONFIG.DATA_IN_SIZE {20}] $shifter_prn_data" << std::endl;
+    file << "   connect_bd_intf_net [get_bd_intf_pins $prn/prn_full_out] [get_bd_intf_pins $shifter_prn_data/data_in]" << std::endl;
     file << "endgroup" << std::endl;
     file << std::endl;
 
-    file << "# Create PNR shifter for proccessed data" << std::endl;
+    file << "# Create splitter to raw data and processed data" << std::endl;
     file << "startgroup" << std::endl;
-    file << "   set shifter_prn_proc_data [ create_bd_cell -type ip -vlnv ggm:cogen:shifterReal:1.0 shifterReal_0 ]" << std::endl;
-    file << "   set_property -dict [list CONFIG.DATA_OUT_SIZE {16} CONFIG.DATA_IN_SIZE {20}] $shifter_prn_proc_data" << std::endl;
-    file << "   connect_bd_intf_net [get_bd_intf_pins $shifter_prn_proc_data/data_in] [get_bd_intf_pins $splitter_raw_data/data1_out]" << std::endl;
+    file << "   set splitter_raw_data [ create_bd_cell -type ip -vlnv ggm:cogen:dupplReal_1_to_2:1.0 dupplReal_1_to_2_0 ]" << std::endl;
+    file << "   set_property -dict [list CONFIG.DATA_SIZE {16}] $splitter_raw_data" << std::endl;
+    file << "   connect_bd_intf_net [get_bd_intf_pins $shifter_prn_data/data_out] [get_bd_intf_pins $splitter_raw_data/data_in]" << std::endl;
     file << "endgroup" << std::endl;
     file << std::endl;
 
     file << "# Create PNR expander for raw data" << std::endl;
     file << "startgroup" << std::endl;
     file << "   set expander_prn_raw_data [ create_bd_cell -type ip -vlnv ggm:cogen:expanderReal:1.0 expanderReal_0 ]" << std::endl;
-    file << "   set_property -dict [list CONFIG.DATA_IN_SIZE {20} CONFIG.DATA_OUT_SIZE {64}] $expander_prn_raw_data" << std::endl;
-    file << "   connect_bd_intf_net [get_bd_intf_pins $expander_prn_raw_data/data_in] [get_bd_intf_pins $splitter_raw_data/data2_out]" << std::endl;
+    file << "   set_property -dict [list CONFIG.DATA_IN_SIZE {16} CONFIG.DATA_OUT_SIZE {64}] $expander_prn_raw_data" << std::endl;
+    file << "   connect_bd_intf_net [get_bd_intf_pins $splitter_raw_data/data2_out] [get_bd_intf_pins $expander_prn_raw_data/data_in]" << std::endl;
     file << "endgroup" << std::endl;
     file << std::endl;
 
@@ -90,7 +90,7 @@ void TclPRN::writeTclHeader(std::ofstream &file, const std::string &outputFormat
     file << std::endl;
 
     file << "# Set the initial source" << std::endl;
-    file << "set initial_source $shifter_prn_proc_data/data_out" << std::endl;
+    file << "set initial_source $splitter_raw_data/data1_out" << std::endl;
     file << std::endl;
 }
 
