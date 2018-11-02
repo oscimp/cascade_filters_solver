@@ -128,15 +128,15 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
 
     // Contrainte sur la taille en sortie
     for (std::int64_t i = 0; i < NbStage; ++i) {
-        std::string cstrName = "cstr_pi_i_out_" + std::to_string(i);
+        std::string cstrName = "cstr_pi_i_min_" + std::to_string(i);
         GRBLinExpr expr = 0;
 
         // Somme des rejections précédentes (avec shift)
         for (int stage = 0; stage <= i; ++stage) {
             expr += (1.0/6.0) * m_var_r[stage];
 
-            // // Ajout d'un bit de sécurité par étage
-            // expr += 1;
+            // Ajout d'un bit de sécurité par étage
+            expr += 1;
         }
 
         // Ajout d'un bit de sécurité
@@ -163,7 +163,7 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
         for (std::int64_t j = 0; j < NbConfFir; ++j) {
             const Fir &currentFir = m_firs[j];
             std::string cstrName = "cstr_pi_fir_" + std::to_string(i) + "_" + std::to_string(j);
-            m_model.addConstr(m_var_delta[i][j] * (currentFir.getPiC() + 1) - m_var_pi_fir[i][j] == 0, cstrName);
+            m_model.addConstr(m_var_delta[i][j] * (currentFir.getPiC()/* + 1*/) - m_var_pi_fir[i][j] == 0, cstrName);
         }
     }
 
