@@ -1,6 +1,7 @@
 #include "LinearProgram.h"
 
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <iostream>
 
@@ -10,6 +11,7 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
 , m_areaValue(0.0)
 , m_rejectionValue(0.0)
 , m_lastPi(0.0)
+, m_computationTime(0.0)
 , m_outputFormat(outputFormat) {
     // Load firls coeffcients
     loadFirConfiguration(firlsFile, FirMethod::FirLS);
@@ -210,8 +212,17 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
         m_model.setObjective(expr, GRB_MAXIMIZE);
     }
 
+    auto tStart = std::chrono::high_resolution_clock::now();
+
     // Execute le programme linéaire
     m_model.optimize();
+
+    auto tEnd = std::chrono::high_resolution_clock::now();
+
+    double computationTime = std::chrono::duration<double>(tEnd-tStart).count();
+    std::cout << "Wall clock time passed: " << computationTime << " s\n";
+    m_computationTime = computationTime;
+
 
     for (int i = 0; i < NbStage; ++i) {
         for (int j = 0; j < NbConfFir; ++j) {
@@ -308,6 +319,9 @@ void LinearProgram::loadFirConfiguration(const std::string &filename, FirMethod 
 
 void LinearProgram::printResults(std::ostream &out) {
     m_model.update();
+
+    out << std::endl;
+    out << "Computation Time = " << m_computationTime << " seconds" << std::endl;
 
     out << std::endl;
     out << "### Main criteria ###" << std::endl;

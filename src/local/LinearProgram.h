@@ -60,6 +60,7 @@ private:
     double m_areaValue;
     double m_rejectionValue;
     double m_lastPi;
+    double m_computationTime;
 
     std::string m_outputFormat;
 };
