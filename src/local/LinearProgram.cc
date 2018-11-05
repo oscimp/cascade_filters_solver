@@ -141,6 +141,11 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
             expr += 1;
         }
 
+        // Plus la taille du delta du filtre
+        // for (int j = 0; j < NbConfFir; ++j) {
+        //     expr += m_var_pi_fir[i][j] - 2 * m_var_delta[i][j];
+        // }
+
         // Ajout d'un bit de sécurité
         expr += 1;
 
@@ -165,7 +170,7 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
         for (std::int64_t j = 0; j < NbConfFir; ++j) {
             const Fir &currentFir = m_firs[j];
             std::string cstrName = "cstr_pi_fir_" + std::to_string(i) + "_" + std::to_string(j);
-            m_model.addConstr(m_var_delta[i][j] * (currentFir.getPiC()/* + 1*/) - m_var_pi_fir[i][j] == 0, cstrName);
+            m_model.addConstr(m_var_delta[i][j] * currentFir.getPiFir() - m_var_pi_fir[i][j] == 0, cstrName);
         }
     }
 
@@ -345,4 +350,12 @@ void LinearProgram::printResults(std::ostream &out) {
         out << "Stage rejection: " << m_var_r[i].get(GRB_DoubleAttr_X) << std::endl;
         ++i;
     }
+
+    out << std::endl;
+    out << "### Command for the C++ simulator" << std::endl;
+    out << "./cascaded-filters data_prn.bin test.bin ";
+    for (const SelectedFilter &filter: m_selectedFilters) {
+        out << filter.filter.getFilterName() << " " << filter.shift << " ";
+    }
+    out << std::endl;
 }

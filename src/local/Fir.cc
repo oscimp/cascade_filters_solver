@@ -6,8 +6,7 @@ Fir::Fir(FirMethod method, std::uint16_t cardC, std::uint16_t piC, double noiseL
 : m_method(method)
 , m_cardC(cardC)
 , m_piC(piC)
-, m_noiseLevel(noiseLevel)
-, m_realPiOut(piC) {
+, m_noiseLevel(noiseLevel) {
     // ctor
 }
 
@@ -27,8 +26,22 @@ FirMethod Fir::getMethod() const {
     return m_method;
 }
 
-std::int64_t Fir::getPiOut() const {
-    return m_realPiOut;
+std::int64_t Fir::getPiFir() const {
+    return m_piC;
+}
+
+std::string Fir::getFilterName() const {
+    char filterName[128] = {0};
+    switch (getMethod()) {
+    case FirMethod::Fir1:
+        std::snprintf(filterName, 128, "filters/fir1/fir1_%03lu_int%02lu", getCardC(), getPiC());
+        break;
+    case FirMethod::FirLS:
+        std::snprintf(filterName, 128, "filters/firls/firls_%03lu_int%02lu", getCardC(), getPiC());
+        break;
+    }
+
+    return std::string(filterName);
 }
 
 std::ostream& operator<<(std::ostream& os, const Fir& fir) {
@@ -43,6 +56,6 @@ std::ostream& operator<<(std::ostream& os, const Fir& fir) {
         break;
     }
 
-    os << "fir('" << methodString << "', C:" << fir.m_cardC << ", PiC:" << fir.m_piC << ", " << fir.m_noiseLevel << " dB, PiFir: " << fir.m_realPiOut << " bit)";
+    os << "fir('" << methodString << "', C:" << fir.m_cardC << ", PiC:" << fir.m_piC << ", " << fir.m_noiseLevel << " dB, PiFir: " << fir.getPiFir() << " bit)";
     return os;
 }

@@ -17,7 +17,8 @@ public:
     std::uint64_t getCardC() const;
     double getNoiseLevel() const;
     FirMethod getMethod() const;
-    std::int64_t getPiOut() const;
+    std::int64_t getPiFir() const;
+    std::string getFilterName() const;
 
 public:
     friend std::ostream& operator<<(std::ostream& os, const Fir& fir);
@@ -27,7 +28,6 @@ private:
     const std::uint16_t m_cardC;
     const std::uint16_t m_piC;
     const double m_noiseLevel;
-    const std::uint16_t m_realPiOut;
 };
 
 #endif // FIR_H

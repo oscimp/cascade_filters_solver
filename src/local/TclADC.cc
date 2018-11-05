@@ -132,7 +132,7 @@ void TclADC::writeTclHeader(std::ofstream &file, const std::string &outputFormat
     file << std::endl;
 }
 
-int TclADC::addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &filter, std::string &previousSource) {
+void TclADC::addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &filter, std::string &previousSource) {
     Fir fir = filter.filter;
     std::string firName = "fir_" + std::to_string(firNumber);
 
@@ -141,16 +141,16 @@ int TclADC::addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &
     file << "    # Create the block and configure it" << std::endl;
     file << "    set " << firName << " [ create_bd_cell -type ip -vlnv ggm:cogen:firReal:1.0 " << firName << " ]" << std::endl;
     file << "    set_property -dict [ list \\" << std::endl;
-    file << "        CONFIG.NB_COEFF {" << std::to_string(fir.getCardC()) << "} \\" << std::endl;
+    file << "        CONFIG.NB_COEFF {" << fir.getCardC() << "} \\" << std::endl;
     file << "        CONFIG.DECIMATE_FACTOR {1} \\" << std::endl;
-    file << "        CONFIG.COEFF_SIZE {" << std::to_string(fir.getPiC()) << "} \\" << std::endl;
+    file << "        CONFIG.COEFF_SIZE {" << fir.getPiC() << "} \\" << std::endl;
     if (firNumber == 0) {
         file << "        CONFIG.DATA_IN_SIZE {16} \\" << std::endl;
     }
     else {
-        file << "        CONFIG.DATA_IN_SIZE {" << std::to_string(filter.piIn) << "} \\" << std::endl;
+        file << "        CONFIG.DATA_IN_SIZE {" << filter.piIn << "} \\" << std::endl;
     }
-    file << "        CONFIG.DATA_OUT_SIZE {" << std::to_string(filter.piIn + filter.piFir) << "} ] $" << firName << std::endl;
+    file << "        CONFIG.DATA_OUT_SIZE {" << (filter.piIn + fir.getPiFir()) << "} ] $" << firName << std::endl;
     file << std::endl;
     file << "    # Automation for AXI" << std::endl;
     file << "    apply_bd_automation -rule xilinx.com:bd_rule:axi4 \\" << std::endl;
@@ -167,11 +167,6 @@ int TclADC::addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &
     file << "save_bd_design" << std::endl;
     file << std::endl;
 
-    if (filter.shift == 0) {
-        previousSource = "$fir_" + std::to_string(firNumber) + "/data_out";
-        return filter.piOut;
-    }
-
     std::string shifterName = "shifter_" + std::to_string(firNumber);
     file << "# Create shifter" << std::endl;
     file << "startgroup" << std::endl;
@@ -179,7 +174,7 @@ int TclADC::addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &
     file << "    set " << shifterName << " [ create_bd_cell -type ip -vlnv ggm:cogen:shifterReal:1.0 " << shifterName << " ]" << std::endl;
     file << "    set_property -dict [ list \\" << std::endl;
     file << "        CONFIG.DATA_OUT_SIZE {" << filter.piOut << "} \\" << std::endl;
-    file << "        CONFIG.DATA_IN_SIZE {" << (filter.piIn + filter.piFir) << "} ] $" << shifterName << std::endl;
+    file << "        CONFIG.DATA_IN_SIZE {" << (filter.piIn + fir.getPiFir()) << "} ] $" << shifterName << std::endl;
     file << std::endl;
     file << "    # Connect input data" << std::endl;
     file << "    connect_bd_intf_net\\" << std::endl;
@@ -192,7 +187,6 @@ int TclADC::addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &
     file << std::endl;
 
     previousSource = "$shifter_" + std::to_string(firNumber) + "/data_out";
-    return filter.piOut;
 }
 
 void TclADC::writeTclFooter(std::ofstream &file, int inputSize, std::string &previousSource, const std::string &outputFormat) {

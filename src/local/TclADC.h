@@ -8,7 +8,7 @@
 class TclADC: public TclProject {
 private:
     void writeTclHeader(std::ofstream &file, const std::string &outputFormat);
-    virtual int addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &filter, std::string &previousSource);
+    virtual void addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &filter, std::string &previousSource) override;
     void writeTclFooter(std::ofstream &file, int inputSize, std::string &previousSource, const std::string &outputFormat);
 };
 

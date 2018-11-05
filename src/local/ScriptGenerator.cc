@@ -39,22 +39,10 @@ void ScriptGenerator::generateDeployScript(const LinearProgram &lp, const std::s
     // Configure the filters
     std::string filterList = "";
     for (auto filter: selectedFilters) {
-        Fir fir = filter.filter;
-        char filterName[128] = {0};
-        switch (fir.getMethod()) {
-        case FirMethod::Fir1:
-            std::snprintf(filterName, 128, " /usr/local/share/filters/fir1/fir1_%03lu_int%02lu", fir.getCardC(), fir.getPiC());
-            filterList += std::string(filterName);
-            break;
-        case FirMethod::FirLS:
-            std::snprintf(filterName, 128, " /usr/local/share/filters/firls/firls_%03lu_int%02lu", fir.getCardC(), fir.getPiC());
-            filterList += std::string(filterName);
-            break;
-        default:
-            std::cerr << "ScriptGenerator::generateDeployScript: Kaiser filters no handled" << std::endl;
-        }
+        const Fir &fir = filter.filter;
+        filterList += "/usr/local/share/" + fir.getFilterName() + " ";
     }
-    safeShellCommand(file, "ssh root@redpitaya \"/usr/local/bin/prn_fir_loader_us" + filterList + "\"");
+    safeShellCommand(file, "ssh root@redpitaya \"/usr/local/bin/prn_fir_loader_us " + filterList + "\"");
 
     // Generate all the data
     safeShellCommand(file, "ssh root@redpitaya \"/usr/local/bin/prn_data_retreiver_us\"");
@@ -88,22 +76,7 @@ void ScriptGenerator::generateSimulationScript(const LinearProgram &lp, const st
     auto filters = lp.getSelectedFilters();
     for (const SelectedFilter &filter: filters) {
         file << "# Stage " << filter.stage << std::endl;
-
-        // Création du nom du filtre
-        Fir fir = filter.filter;
-        char filterName[128] = {0};
-        switch (fir.getMethod()) {
-        case FirMethod::Fir1:
-            std::snprintf(filterName, 128, "filters/fir1/fir1_%03lu_int%02lu", fir.getCardC(), fir.getPiC());
-            break;
-        case FirMethod::FirLS:
-            std::snprintf(filterName, 128, "filters/firls/firls_%03lu_int%02lu", fir.getCardC(), fir.getPiC());
-            break;
-        default:
-            std::cerr << "ScriptGenerator::generateSimulationScript: Kaiser filters no handled" << std::endl;
-        }
-
-        file << "b" << filter.stage << "= load(\"" << std::string(filterName) << "\");" << std::endl;
+        file << "b" << filter.stage << "= load(\"" << filter.filter.getFilterName() << "\");" << std::endl;
         file << "fir_data" << filter.stage << " = filter(b" << filter.stage << ", 1, " << previousSource << ");" << std::endl;
         file << "shift_data" << filter.stage << " = fir_data" << filter.stage << " ./ (2^" << filter.shift << ");" << std::endl;
         file << std::endl;
