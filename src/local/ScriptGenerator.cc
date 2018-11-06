@@ -105,6 +105,7 @@ void ScriptGenerator::generateSimulationScript(const LinearProgram &lp, const st
     file << "mag = abs(hTotal);" << std::endl;
     file << "mag = mag ./ mag(1);" << std::endl;
     file << "log_freqz = 20 * log10(mag);" << std::endl;
+    file << "write_binary(\"freqz_" << filters.size() << "_stage.bin\", log_freqz);" << std::endl;
     file << std::endl;
 
     // Affichage des résultats
