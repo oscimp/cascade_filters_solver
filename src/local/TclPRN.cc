@@ -165,15 +165,14 @@ void TclPRN::writeTclFooter(std::ofstream &file, int inputSize, std::string &pre
         concurentThreadsSupported = 1;
     }
 
-    file << "exit" << std::endl;
     file << "# Create bitstream" << std::endl;
     file << "launch_runs impl_1 -to_step write_bitstream -jobs " << concurentThreadsSupported << std::endl;
+    file << "wait_on_run impl_1" << std::endl;
     file << std::endl;
     // file << "# Create bitstream" << std::endl;
     // file << "launch_runs synth_1 -jobs " << std::to_string(concurentThreadsSupported) << std::endl;
     // file << "wait_on_run synth_1" << std::endl;
     // file << "launch_runs impl_1 -to_step write_bitstream -jobs " << std::to_string(concurentThreadsSupported) << std::endl;
-    // file << "wait_on_run impl_1" << std::endl;
     // file << std::endl;
 
     file << "# export usage" << std::endl;
