@@ -35,10 +35,7 @@ void TclPRN::writeTclHeader(std::ofstream &file, const std::string &outputFormat
     file << "    # processing_system7_0, and set properties" << std::endl;
     file << "    set ps7 [ create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7:5.5 processing_system7_0 ]" << std::endl;
     file << "    set_property -dict [ list \\" << std::endl;
-    file << "        CONFIG.PCW_IMPORT_BOARD_PRESET {" << m_fpgaDevPath << "/redpitaya/redpitaya_preset.xml}] $ps7" << std::endl;
-    // file << "        CONFIG.PRESET {ZedBoard} \\" << std::endl;
-    // file << "        CONFIG.PCW_FPGA1_PERIPHERAL_FREQMHZ {200.000000} \\" << std::endl;
-    // file << "        CONFIG.PCW_EN_CLK1_PORT {1} ] $processing_system7_0" << std::endl;
+    file << "        CONFIG.PCW_IMPORT_BOARD_PRESET \"$fpga_ip/preset/redpitaya_preset.xml\" ] $ps7" << std::endl;
     file << std::endl;
     file << "    # Automation" << std::endl;
     file << "    apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 \\" << std::endl;
@@ -168,12 +165,16 @@ void TclPRN::writeTclFooter(std::ofstream &file, int inputSize, std::string &pre
         concurentThreadsSupported = 1;
     }
 
+    file << "exit" << std::endl;
     file << "# Create bitstream" << std::endl;
-    file << "launch_runs synth_1 -jobs " << std::to_string(concurentThreadsSupported) << std::endl;
-    file << "wait_on_run synth_1" << std::endl;
-    file << "launch_runs impl_1 -to_step write_bitstream -jobs " << std::to_string(concurentThreadsSupported) << std::endl;
-    file << "wait_on_run impl_1" << std::endl;
+    file << "launch_runs impl_1 -to_step write_bitstream -jobs " << concurentThreadsSupported << std::endl;
     file << std::endl;
+    // file << "# Create bitstream" << std::endl;
+    // file << "launch_runs synth_1 -jobs " << std::to_string(concurentThreadsSupported) << std::endl;
+    // file << "wait_on_run synth_1" << std::endl;
+    // file << "launch_runs impl_1 -to_step write_bitstream -jobs " << std::to_string(concurentThreadsSupported) << std::endl;
+    // file << "wait_on_run impl_1" << std::endl;
+    // file << std::endl;
 
     file << "# export usage" << std::endl;
     file << "open_run impl_1" << std::endl;

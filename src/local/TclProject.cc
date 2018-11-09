@@ -8,15 +8,6 @@
 
 
 void TclProject::generate(const LinearProgram &lp, const std::string &outputFormat) {
-    // Get FPGA_DEV path
-    const char* env = std::getenv("OSC_IMP_DEV");
-    if (env == nullptr || env[0] == 0) {
-        std::cerr << "OSC_IMP_DEV variable not defined" << std::endl;
-        std::exit(-1);
-    }
-
-    m_fpgaDevPath = std::string(env);
-
     // We generate the tcl file
     generateProjectFile(lp, outputFormat);
 }
@@ -39,8 +30,10 @@ void TclProject::generateProjectFile(const LinearProgram &lp, const std::string 
         ++firNumber;
     }
 
+    // The last output size are equal to the last pi_out + number of stage (=> 1 bit per stage)
+    std::int64_t lastOutputSize = filters.back().piOut + filters.size();
+
     // Write the footer
-    std::int64_t lastOutputSize = filters.back().piOut;
     writeTclFooter(file, lastOutputSize, previousSource, outputFormat);
 }
 
@@ -56,8 +49,8 @@ void TclProject::addTclFir(std::ofstream &file, int firNumber, const SelectedFil
     file << "        CONFIG.NB_COEFF {" << fir.getCardC() << "} \\" << std::endl;
     file << "        CONFIG.DECIMATE_FACTOR {1} \\" << std::endl;
     file << "        CONFIG.COEFF_SIZE {" << fir.getPiC() << "} \\" << std::endl;
-    file << "        CONFIG.DATA_IN_SIZE {" << filter.piIn << "} \\" << std::endl;
-    file << "        CONFIG.DATA_OUT_SIZE {" << (filter.piIn + fir.getPiFir()) << "} ] $" << firName << std::endl;
+    file << "        CONFIG.DATA_IN_SIZE {" << filter.piIn + firNumber << "} \\" << std::endl;
+    file << "        CONFIG.DATA_OUT_SIZE {" << filter.piIn + fir.getPiFir() + firNumber + 1 << "} ] $" << firName << std::endl;
     file << std::endl;
     file << "    # Automation for AXI" << std::endl;
     file << "    apply_bd_automation -rule xilinx.com:bd_rule:axi4 \\" << std::endl;
@@ -74,14 +67,19 @@ void TclProject::addTclFir(std::ofstream &file, int firNumber, const SelectedFil
     file << "save_bd_design" << std::endl;
     file << std::endl;
 
+    if (filter.shift == 0) {
+        previousSource = "$"+ firName + "/data_out";
+        return;
+    }
+
     std::string shifterName = "shifter_" + std::to_string(firNumber);
     file << "# Create shifter" << std::endl;
     file << "startgroup" << std::endl;
     file << "    # Create the block and configure it" << std::endl;
     file << "    set " << shifterName << " [ create_bd_cell -type ip -vlnv ggm:cogen:shifterReal:1.0 " << shifterName << " ]" << std::endl;
     file << "    set_property -dict [ list \\" << std::endl;
-    file << "        CONFIG.DATA_OUT_SIZE {" << filter.piOut << "} \\" << std::endl;
-    file << "        CONFIG.DATA_IN_SIZE {" << (filter.piIn + fir.getPiFir()) << "} ] $" << shifterName << std::endl;
+    file << "        CONFIG.DATA_OUT_SIZE {" << filter.piOut + firNumber + 1 << "} \\" << std::endl;
+    file << "        CONFIG.DATA_IN_SIZE {" << filter.piIn + fir.getPiFir() + firNumber + 1  << "} ] $" << shifterName << std::endl;
     file << std::endl;
     file << "    # Connect input data" << std::endl;
     file << "    connect_bd_intf_net\\" << std::endl;

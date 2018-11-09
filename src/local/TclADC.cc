@@ -37,10 +37,7 @@ void TclADC::writeTclHeader(std::ofstream &file, const std::string &outputFormat
     file << "    # processing_system7_0, and set properties" << std::endl;
     file << "    set ps7 [ create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7:5.5 processing_system7_0 ]" << std::endl;
     file << "    set_property -dict [ list \\" << std::endl;
-    file << "        CONFIG.PCW_IMPORT_BOARD_PRESET {" << m_fpgaDevPath << "/redpitaya/redpitaya_preset.xml}] $ps7" << std::endl;
-    // file << "        CONFIG.PRESET {ZedBoard} \\" << std::endl;
-    // file << "        CONFIG.PCW_FPGA1_PERIPHERAL_FREQMHZ {200.000000} \\" << std::endl;
-    // file << "        CONFIG.PCW_EN_CLK1_PORT {1} ] $processing_system7_0" << std::endl;
+    file << "        CONFIG.PCW_IMPORT_BOARD_PRESET \"$fpga_ip/preset/redpitaya_preset.xml\" ] $ps7" << std::endl;
     file << std::endl;
     file << "    # Automation" << std::endl;
     file << "    apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 \\" << std::endl;
