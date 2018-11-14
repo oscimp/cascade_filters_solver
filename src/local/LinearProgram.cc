@@ -356,7 +356,7 @@ void LinearProgram::printResults(std::ostream &out) {
     out << "./cascaded-filters data_prn.bin simu_" << m_selectedFilters.size() << "_stage.bin ";
     for (std::size_t stage = 0; stage < m_selectedFilters.size(); ++stage) {
         const SelectedFilter &filter = m_selectedFilters[stage];
-        out << filter.filter.getFilterName() << " " << filter.shift << " " << filter.piIn + filter.piFir + 1 << " ";
+        out << filter.filter.getFilterName() << " " << filter.shift << " " << filter.piIn + filter.piFir << " ";
     }
     out << std::endl;
 }
