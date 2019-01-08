@@ -177,7 +177,7 @@ void TclPRN::writeTclFooter(std::ofstream &file, int inputSize, std::string &pre
 
     file << "# export usage" << std::endl;
     file << "open_run impl_1" << std::endl;
-    file << "report_utilization -hierarchical -hierarchical_depth 1 -file " << outputFormat << "/" << outputFormat << "_usage_ressources.txt" << std::endl;
+    file << "report_utilization -hierarchical -hierarchical_depth 2 -file " << outputFormat << "/" << outputFormat << "_usage_ressources.txt" << std::endl;
     file << std::endl;
 
     file << "# Copy the bitstream" << std::endl;
