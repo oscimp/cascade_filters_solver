@@ -5,7 +5,7 @@
 #include <cmath>
 #include <iostream>
 
-LinearProgram::LinearProgram(const std::int64_t nbStage, const double RejectionLevel, const std::string &firlsFile, const std::string &fir1File, const std::string &outputFormat)
+LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, const std::string &firlsFile, const std::string &fir1File, const std::string &outputFormat)
 : m_env(GRBEnv())
 , m_model(m_env)
 , m_areaValue(0.0)
@@ -23,7 +23,7 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double RejectionL
     const std::int64_t PiIn = 16; // PRN input
     // const std::int64_t PiIn = 7; // ADC input
     const std::int64_t PiMax = 256;
-    const double RejectionMin = RejectionLevel;
+    const double AMax = areaMax;
 
     // Déclaration des variables delta
     m_var_delta.resize(NbStage);
@@ -200,21 +200,21 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double RejectionL
 
     // Contrainte sur la taille max
     {
-        std::string cstrName = "cstr_rejection_min";
+        std::string cstrName = "cstr_A_max";
         GRBLinExpr expr = 0;
         for (std::int64_t i = 0; i < NbStage; ++i) {
-            expr += m_var_r[i];
+            expr += m_var_a[i];
         }
-        m_model.addConstr(expr, GRB_GREATER_EQUAL, RejectionMin, cstrName);
+        m_model.addConstr(expr, GRB_LESS_EQUAL, AMax, cstrName);
     }
 
     // Set the objective
     {
         GRBLinExpr expr = 0;
         for (int i = 0; i < NbStage; ++i) {
-            expr += m_var_a[i];
+            expr += m_var_r[i];
         }
-        m_model.setObjective(expr, GRB_MINIMIZE);
+        m_model.setObjective(expr, GRB_MAXIMIZE);
     }
 
     auto tStart = std::chrono::high_resolution_clock::now();

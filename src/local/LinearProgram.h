@@ -21,7 +21,7 @@ struct SelectedFilter {
 
 class LinearProgram {
 public:
-    LinearProgram(const std::int64_t nbStage, const double noiseLevel, const std::string &firlsFile, const std::string &fir1File, const std::string &outputFormat);
+    LinearProgram(const std::int64_t nbStage, const double areaMax, const std::string &firlsFile, const std::string &fir1File, const std::string &outputFormat);
 
     const std::vector<SelectedFilter> &getSelectedFilters() const;
 
