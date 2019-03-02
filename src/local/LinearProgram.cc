@@ -17,6 +17,8 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
     loadFirConfiguration(firlsFile, FirMethod::FirLS);
     loadFirConfiguration(fir1File, FirMethod::Fir1);
 
+	std::cout << "Total config FIR: " << m_firs.size() << std::endl;
+
     // Déclaration des constantes internes
     const std::int64_t NbConfFir = m_firs.size();
     const std::int64_t NbStage = nbStage;
@@ -136,31 +138,10 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
         // Somme des rejections précédentes (avec shift)
         for (int stage = 0; stage <= i; ++stage) {
             expr += (1.0/6.0) * m_var_r[stage];
-
-            // Ajout d'un bit de sécurité par étage
-            expr += 1;
         }
-
-        // Plus la taille du delta du filtre
-        // for (int j = 0; j < NbConfFir; ++j) {
-        //     expr += m_var_pi_fir[i][j] - 2 * m_var_delta[i][j];
-        // }
 
         // Ajout d'un bit de sécurité
         expr += 1;
-
-        // // Taille égale à la sortie du fir => pas de shift
-        // if (i == 0) {
-        //     expr += m_var_PI_IN;
-        // }
-        // else {
-        //     expr += m_var_pi[i-1];
-        // }
-        //
-        // // Taille des données à la sortie du filtre
-        // for (std::int64_t j = 0; j < NbConfFir; ++j) {
-        //     expr += m_var_pi_fir[i][j];
-        // }
 
         m_model.addConstr(expr, GRB_LESS_EQUAL, m_var_pi[i], cstrName);
     }
