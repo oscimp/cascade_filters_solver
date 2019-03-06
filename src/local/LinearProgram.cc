@@ -138,9 +138,12 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
         // Somme des rejections précédentes (avec shift)
         for (int stage = 0; stage <= i; ++stage) {
             expr += (1.0/6.0) * m_var_r[stage];
+
+            // Pour prendre en compte le bit de signe
+            expr += 1;
         }
 
-        // Ajout d'un bit de sécurité
+        // Ajout d'un bit de sécurité (Utile ?)
         expr += 1;
 
         m_model.addConstr(expr, GRB_LESS_EQUAL, m_var_pi[i], cstrName);
@@ -337,7 +340,7 @@ void LinearProgram::printResults(std::ostream &out) {
     out << "./cascaded-filters data_prn.bin simu_" << m_selectedFilters.size() << "_stage.bin ";
     for (std::size_t stage = 0; stage < m_selectedFilters.size(); ++stage) {
         const SelectedFilter &filter = m_selectedFilters[stage];
-        out << filter.filter.getFilterName() << " " << filter.shift << " " << filter.piIn + filter.piFir << " ";
+        out << filter.filter.getFilterName() << " " << filter.shift << " " << filter.piOut << " ";
     }
     out << std::endl;
 }

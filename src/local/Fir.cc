@@ -27,7 +27,7 @@ FirMethod Fir::getMethod() const {
 }
 
 std::int64_t Fir::getPiFir() const {
-    return m_piC + 0.5 * std::log2(m_cardC);
+    return m_piC;
 }
 
 std::string Fir::getFilterName() const {
