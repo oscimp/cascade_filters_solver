@@ -140,7 +140,14 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double RejectionL
             expr += (1.0/6.0) * m_var_r[stage];
 
             // Pour prendre en compte le bit de signe
-            expr += 1;
+            // expr += 1;
+
+            // Pour prendre en compte le bit de signe - si un filtre est séléctionné
+            GRBLinExpr sum_delta = 0;
+            for (std::int64_t j = 0; j < NbConfFir; ++j) {
+              sum_delta += m_var_delta[i][j];
+            }
+            expr += sum_delta;
         }
 
         // Ajout d'un bit de sécurité (Utile ?)
@@ -286,6 +293,7 @@ void LinearProgram::loadFirConfiguration(const std::string &filename, FirMethod 
     }
 
     // Read the file until eof
+    int discardedFilters = 0;
     for (;;) {
         std::uint16_t nob = 0;
         std::uint16_t coeff = 0;
@@ -301,9 +309,17 @@ void LinearProgram::loadFirConfiguration(const std::string &filename, FirMethod 
             break;
         }
 
+        if (rejection <= -10) {
+          ++discardedFilters;
+          continue;
+        }
+        std::cout << rejection << std::endl;
+
         // Add fir configuration
         m_firs.emplace_back(method, coeff, nob, rejection);
     }
+
+    std::cout << "discardedFilters: " << discardedFilters << std::endl;
 }
 
 void LinearProgram::printResults(std::ostream &out) {
