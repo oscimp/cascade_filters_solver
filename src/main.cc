@@ -37,17 +37,22 @@ int main(int argc, char *argv[]) {
     }
 
     std::cout << "### Start LP solver... ###" << std::endl;
-    LinearProgram lp(nbStage, areaMax, firlsFile, fir1File, outputFormat);
+    try {
+      LinearProgram lp(nbStage, areaMax, firlsFile, fir1File, outputFormat);
 
-    lp.printDebugFile();
-    lp.printResults();
-    lp.printResults("sol.txt");
+      lp.printDebugFile();
+      lp.printResults();
+      lp.printResults("sol.txt");
 
-    TclPRN tcl;
-    tcl.generate(lp, outputFormat);
+      TclPRN tcl;
+      tcl.generate(lp, outputFormat);
 
-    ScriptGenerator::generateDeployScript(lp, outputFormat, "prn");
-    ScriptGenerator::generateSimulationScript(lp, outputFormat);
+      ScriptGenerator::generateDeployScript(lp, outputFormat, "prn");
+      ScriptGenerator::generateSimulationScript(lp, outputFormat);
+    } catch (GRBException e) {
+      std::cout << e.getMessage() << std::endl;
+    }
+
 
     return 0;
 }
