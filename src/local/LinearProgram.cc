@@ -140,14 +140,15 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double RejectionL
             expr += (1.0/6.0) * m_var_r[stage];
 
             // Pour prendre en compte le bit de signe
-            // expr += 1;
+            expr += 1;
 
-            // Pour prendre en compte le bit de signe - si un filtre est séléctionné
-            GRBLinExpr sum_delta = 0;
-            for (std::int64_t j = 0; j < NbConfFir; ++j) {
-              sum_delta += m_var_delta[i][j];
-            }
-            expr += sum_delta;
+            // TROP LENT !
+            // // Pour prendre en compte le bit de signe - si un filtre est séléctionné
+            // GRBLinExpr sum_delta = 0;
+            // for (std::int64_t j = 0; j < NbConfFir; ++j) {
+            //   sum_delta += m_var_delta[i][j];
+            // }
+            // expr += sum_delta;
         }
 
         // Ajout d'un bit de sécurité (Utile ?)
