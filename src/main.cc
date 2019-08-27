@@ -19,13 +19,13 @@ int main(int argc, char *argv[]) {
     // Vérification des paramètres
     if (argc != 6) {
         std::cerr << "Usage:" << std::endl;
-        std::cerr << "\t" << argv[0] << " NUMBER_STAGE REJECTION_MIN FIRLS_DATA FIR1_DATA OUTPUT_FORMAT" << std::endl;
+        std::cerr << "\t" << argv[0] << " NUMBER_STAGE AREA_MAX FIRLS_DATA FIR1_DATA OUTPUT_FORMAT" << std::endl;
         std::exit(1);
     }
 
     // Définition des paramètres
     const std::int64_t nbStage = std::stoul(argv[1]);
-    const double rejectionMin = std::strtod(argv[2], nullptr);
+    const double areaMax = std::strtod(argv[2], nullptr);
     const std::string firlsFile = argv[3];
     const std::string fir1File = argv[4];
     const std::string outputFormat = argv[5];
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "### Start LP solver... ###" << std::endl;
     try {
-      LinearProgram lp(nbStage, rejectionMin, firlsFile, fir1File, outputFormat);
+      LinearProgram lp(nbStage, areaMax, firlsFile, fir1File, outputFormat);
 
       lp.printDebugFile();
       lp.printResults();
