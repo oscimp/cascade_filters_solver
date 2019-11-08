@@ -17,7 +17,7 @@ To add your coefficients set, your file must be in binary format with:
 - min_area_fixe_rej_v2: Stable version to minimize area for a minimal rejection level
 - min_area_fixe_rej_v3: Experimental version to minimize area for a minimal rejection level (fix some bugs but twice as long, see Notes)
 
-##Compilation
+## Compilation
 ```sh
 mkdir build
 cd build
