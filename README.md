@@ -1,6 +1,8 @@
 # Cascade of Filters Solver
 This software is a solver to choose the best configuration of FIR filters to
-perform a cascade of filter.
+perform a cascade of filters. Assuming a set of filters has been characterized and a cost
+function has been computed for each filter (number of coefficients and number of bits
+describing each coefficient), then the software will identify the optimum set of filters meeting a target, either of performance or resource usage.
 
 ## Dependency
 - [Gurobi](https://www.gurobi.com/) v8.0.1
@@ -31,7 +33,7 @@ make
 # ./fir-solver NUMBER_STAGE AREA_MAX FIRLS_DATA FIR1_DATA OUTPUT_FORMAT
 ./fir-solver 5 500 ../fir_data/firls_2_22_bits_3_2_60_coeffs_jmf.bin ../fir_data/fir1_2_18_bits_3_60_coeffs_jmf.bin example
 ```
-Will be produce the results into example folder for 5 stages of filters with 500 a.u. of area.
+Will produce the results into example folder for 5 stages of filters with 500 a.u. of area.
 
 
 ```
