@@ -40,7 +40,9 @@ include_directories(${GUROBI_INCLUDE_DIR})
 add_executable(fir-solver
   src/main.cc
   src/local/Fir.cc
-  src/local/LinearProgram.cc
+  src/local/MaximizeRejection.cc
+  src/local/MinimizeArea.cc
+  src/local/QuadraticProgram.cc
   src/local/ScriptGenerator.cc
   src/local/TclADC.cc
   src/local/TclPRN.cc

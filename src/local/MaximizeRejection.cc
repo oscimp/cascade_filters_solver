@@ -16,21 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>
  */
 
-#include "LinearProgram.h"
+#include "MaximizeRejection.h"
 
 #include <cassert>
 #include <chrono>
 #include <cmath>
 #include <iostream>
 
-LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, const std::string &firlsFile, const std::string &fir1File, const std::string &outputFormat)
-: m_env(GRBEnv())
-, m_model(m_env)
+MaximizeRejection::MaximizeRejection(const std::int64_t nbStage, const double areaMax, const std::string &firlsFile, const std::string &fir1File, const std::string &experimentName)
+: QuadraticProgram(experimentName)
 , m_areaValue(0.0)
 , m_rejectionValue(0.0)
 , m_lastPi(0.0)
-, m_computationTime(0.0)
-, m_outputFormat(outputFormat) {
+, m_computationTime(0.0) {
     // Load firls coeffcients
     loadFirConfiguration(firlsFile, FirMethod::FirLS);
     loadFirConfiguration(fir1File, FirMethod::Fir1);
@@ -234,10 +232,8 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
 
     auto tEnd = std::chrono::high_resolution_clock::now();
 
-    double computationTime = std::chrono::duration<double>(tEnd-tStart).count();
-    std::cout << "Wall clock time passed: " << computationTime << " s\n";
-    m_computationTime = computationTime;
-
+    m_computationTime = std::chrono::duration<double>(tEnd-tStart).count();
+    std::cout << "Wall clock time passed: " << m_computationTime << "s" << std::endl;
 
     for (int i = 0; i < NbStage; ++i) {
         for (int j = 0; j < NbConfFir; ++j) {
@@ -271,76 +267,11 @@ LinearProgram::LinearProgram(const std::int64_t nbStage, const double areaMax, c
     m_lastPi = m_var_pi[NbStage - 1].get(GRB_DoubleAttr_X);
 }
 
-const std::vector<SelectedFilter> &LinearProgram::getSelectedFilters() const {
+const std::vector<SelectedFilter> &MaximizeRejection::getSelectedFilters() const {
     return m_selectedFilters;
 }
 
-void LinearProgram::printDebugFile() {
-    std::cout << std::endl;
-    std::cout << "### Write the linear programm and the solution ###" << std::endl;
-    m_model.update();
-
-    std::string filename = m_outputFormat + "/gurobi.lp";
-    m_model.write(filename);
-
-    // filename = m_outputFormat + "/glpk_lp_sol.txt";
-    // glp_print_sol(m_mip, filename.c_str());
-    //
-    // filename = m_outputFormat + "/glpk_mip_sol.txt";
-    // glp_print_mip(m_mip, filename.c_str());
-}
-
-void LinearProgram::printResults() {
-    printResults(std::cout);
-}
-
-void LinearProgram::printResults(const std::string &filename) {
-    std::ofstream file(m_outputFormat + "/" + filename);
-    if(!file.good()) {
-        std::cerr << "LinearProgram::printResults(filename): open '" << m_outputFormat << "/" << filename << "': failed" << std::endl;
-    }
-
-    printResults(file);
-}
-
-void LinearProgram::loadFirConfiguration(const std::string &filename, FirMethod method) {
-    // Open the file
-    std::ifstream file(filename, std::ios::binary);
-    if (file.fail()) {
-        std::cerr << "LinearProgram::loadFirConfiguration: The file '" << filename << "' is missing" << std::endl;
-        std::exit(-1);
-    }
-
-    // Read the file until eof
-    int discardedFilters = 0;
-    for (;;) {
-        std::uint16_t nob = 0;
-        std::uint16_t coeff = 0;
-        double rejection = 0.0;
-
-        // Read the values
-        file.read(reinterpret_cast<char*>(&nob), sizeof(std::uint16_t));
-        file.read(reinterpret_cast<char*>(&coeff), sizeof(std::uint16_t));
-        file.read(reinterpret_cast<char*>(&rejection), sizeof(double));
-
-        // If the end of file is reached
-        if (file.eof()) {
-            break;
-        }
-
-        if (rejection <= -10) {
-          ++discardedFilters;
-          continue;
-        }
-
-        // Add fir configuration
-        m_firs.emplace_back(method, coeff, nob, rejection);
-    }
-
-    std::cout << "discardedFilters: " << discardedFilters << std::endl;
-}
-
-void LinearProgram::printResults(std::ostream &out) {
+void MaximizeRejection::printResults(std::ostream &out) {
     m_model.update();
 
     out << std::endl;

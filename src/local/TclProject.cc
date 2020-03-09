@@ -22,24 +22,24 @@
 #include <iostream>
 #include <string>
 
-#include "LinearProgram.h"
+#include "QuadraticProgram.h"
 
 
-void TclProject::generate(const LinearProgram &lp, const std::string &outputFormat) {
+void TclProject::generate(const QuadraticProgram &milp, const std::string &experimentName) {
     // We generate the tcl file
-    generateProjectFile(lp, outputFormat);
+    generateProjectFile(milp, experimentName);
 }
 
-void TclProject::generateProjectFile(const LinearProgram &lp, const std::string &outputFormat) {
+void TclProject::generateProjectFile(const QuadraticProgram &milp, const std::string &experimentName) {
     // Create the file
-    std::string scriptFilename = outputFormat + "/" + outputFormat + ".tcl";
+    std::string scriptFilename = experimentName + "/" + experimentName + ".tcl";
     std::ofstream file(scriptFilename);
 
     // Write the tcl header
-    writeTclHeader(file, outputFormat);
+    writeTclHeader(file, experimentName);
 
     // Add all firs
-    auto filters = lp.getSelectedFilters();
+    auto filters = milp.getSelectedFilters();
     std::string previousSource = "$initial_source";
     int firNumber = 0;
 
@@ -52,7 +52,7 @@ void TclProject::generateProjectFile(const LinearProgram &lp, const std::string 
     std::int64_t lastOutputSize = filters.back().piOut + filters.size();
 
     // Write the footer
-    writeTclFooter(file, lastOutputSize, previousSource, outputFormat);
+    writeTclFooter(file, lastOutputSize, previousSource, experimentName);
 }
 
 void TclProject::addTclFir(std::ofstream &file, int firNumber, const SelectedFilter &filter, std::string &previousSource) {
