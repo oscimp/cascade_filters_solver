@@ -18,39 +18,39 @@
 
 #include "ScriptGenerator.h"
 
-#include "LinearProgram.h"
+#include "QuadraticProgram.h"
 
-void ScriptGenerator::generateDeployScript(const LinearProgram &lp, const std::string &outputFormat, const std::string dtboType) {
-    std::string scriptFilename = outputFormat + "/" + outputFormat + ".sh";
+void ScriptGenerator::generateDeployScript(const QuadraticProgram &milp, const std::string &experimentName, const std::string dtboType) {
+    std::string scriptFilename = experimentName + "/" + experimentName + ".sh";
 
     std::ofstream file = createShellFile(scriptFilename);
 
     // Copy the write_bitstream
-    safeShellCommand(file, "cp " + outputFormat + "/" + outputFormat + "_wrapper.bit /tmp/" + outputFormat + ".bit");
+    safeShellCommand(file, "cp " + experimentName + "/" + experimentName + "_wrapper.bit /tmp/" + experimentName + ".bit");
 
     // Create the the bif script
-    file << "echo \"all:\" > /tmp/" + outputFormat + ".bif" << std::endl;
-    file << "echo \"{\" >> /tmp/" + outputFormat + ".bif" << std::endl;
-    file << "echo \"    /tmp/" + outputFormat + ".bit\" >> /tmp/" + outputFormat + ".bif" << std::endl;
-    file << "echo \"}\" >> /tmp/" + outputFormat + ".bif" << std::endl;
+    file << "echo \"all:\" > /tmp/" + experimentName + ".bif" << std::endl;
+    file << "echo \"{\" >> /tmp/" + experimentName + ".bif" << std::endl;
+    file << "echo \"    /tmp/" + experimentName + ".bit\" >> /tmp/" + experimentName + ".bif" << std::endl;
+    file << "echo \"}\" >> /tmp/" + experimentName + ".bif" << std::endl;
     file << std::endl;
 
     // Generate the bit.bin file
     safeShellCommand(file, "source /opt/Xilinx/Vivado/2018.1/settings64.sh");
-    safeShellCommand(file, "bootgen -image /tmp/" + outputFormat + ".bif -arch zynq -process_bitstream bin -w on");
+    safeShellCommand(file, "bootgen -image /tmp/" + experimentName + ".bif -arch zynq -process_bitstream bin -w on");
 
     // Send the bitstream on the board
-    safeShellCommand(file, "scp /tmp/" + outputFormat + ".bit.bin root@redpitaya:/lib/firmware");
+    safeShellCommand(file, "scp /tmp/" + experimentName + ".bit.bin root@redpitaya:/lib/firmware");
 
     // Create the symlink to the bitstream
-    safeShellCommand(file, "ssh root@redpitaya \"ln -sf /lib/firmware/" + outputFormat + ".bit.bin /lib/firmware/prn_symb.bit.bin\"");
+    safeShellCommand(file, "ssh root@redpitaya \"ln -sf /lib/firmware/" + experimentName + ".bit.bin /lib/firmware/prn_symb.bit.bin\"");
 
     // Remove previous drivers
     safeShellCommand(file, "ssh root@redpitaya \"rmdir /sys/kernel/config/device-tree/overlays/prn/\"");
     safeShellCommand(file, "ssh root@redpitaya \"mkdir /sys/kernel/config/device-tree/overlays/prn/\"");
 
     // Select the right overlays
-    auto selectedFilters = lp.getSelectedFilters();
+    auto selectedFilters = milp.getSelectedFilters();
     std::size_t nbStage = selectedFilters.size();
     safeShellCommand(file, "ssh root@redpitaya \"cat /usr/local/share/dtbo/" + dtboType +"/chain-filter-" + std::to_string(nbStage) + ".dtbo > /sys/kernel/config/device-tree/overlays/prn/dtbo; sleep 1\"");
 
@@ -66,12 +66,12 @@ void ScriptGenerator::generateDeployScript(const LinearProgram &lp, const std::s
     safeShellCommand(file, "ssh root@redpitaya \"/usr/local/bin/prn_data_retreiver_us\"");
 
     // Retrive data
-    safeShellCommand(file, "scp root@redpitaya:~/data_prn.bin " + outputFormat + "/data_" + dtboType + ".bin");
-    safeShellCommand(file, "scp root@redpitaya:~/data_fir.bin " + outputFormat + "/data_" + std::to_string(nbStage) + "_fir.bin");
+    safeShellCommand(file, "scp root@redpitaya:~/data_prn.bin " + experimentName + "/data_" + dtboType + ".bin");
+    safeShellCommand(file, "scp root@redpitaya:~/data_fir.bin " + experimentName + "/data_" + std::to_string(nbStage) + "_fir.bin");
 }
 
-void ScriptGenerator::generateSimulationScript(const LinearProgram &lp, const std::string &outputFormat) {
-    std::string scriptFilename = outputFormat + "/" + outputFormat + ".m";
+void ScriptGenerator::generateSimulationScript(const QuadraticProgram &milp, const std::string &experimentName) {
+    std::string scriptFilename = experimentName + "/" + experimentName + ".m";
 
     std::ofstream file = createOctaveFile(scriptFilename);
 
@@ -91,7 +91,7 @@ void ScriptGenerator::generateSimulationScript(const LinearProgram &lp, const st
 
     // Création des filtres
     std::string previousSource = "noise_int";
-    auto filters = lp.getSelectedFilters();
+    auto filters = milp.getSelectedFilters();
     for (const SelectedFilter &filter: filters) {
         file << "# Stage " << filter.stage << std::endl;
         file << "b" << filter.stage << "= load(\"" << filter.filter.getFilterName() << "\");" << std::endl;

@@ -21,12 +21,12 @@
 
 #include <iostream>
 
-class LinearProgram;
+class QuadraticProgram;
 
 class ScriptGenerator {
 public:
-    static void generateDeployScript(const LinearProgram &lp, const std::string &outputFormat, const std::string dtboType);
-    static void generateSimulationScript(const LinearProgram &lp, const std::string &outputFormat);
+    static void generateDeployScript(const QuadraticProgram &milp, const std::string &experimentName, const std::string dtboType);
+    static void generateSimulationScript(const QuadraticProgram &milp, const std::string &experimentName);
 
 private:
     static std::ofstream createShellFile(const std::string &scriptFilename);

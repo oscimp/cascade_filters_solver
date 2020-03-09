@@ -20,7 +20,8 @@
 
 #include <iostream>
 
-#include "local/LinearProgram.h"
+#include "local/MaximizeRejection.h"
+#include "local/MinimizeArea.h"
 #include "local/ScriptGenerator.h"
 #include "local/TclPRN.h"
 
@@ -35,42 +36,58 @@ static bool createDirectory(const std::string &path) {
 
 int main(int argc, char *argv[]) {
     // Vérification des paramètres
-    if (argc != 6) {
+    if (argc != 7) {
+        std::cerr << "Missing parameter" << std::endl;
         std::cerr << "Usage:" << std::endl;
-        std::cerr << "\t" << argv[0] << " NUMBER_STAGE AREA_MAX FIRLS_DATA FIR1_DATA OUTPUT_FORMAT" << std::endl;
+        std::cerr << "\t" << argv[0] << " --max_rej|--min_area NUMBER_STAGE CONSTRAINT_LIMIT FIRLS_DATA FIR1_DATA EXPERIMENT_NAME" << std::endl;
         std::exit(1);
     }
 
     // Définition des paramètres
-    const std::int64_t nbStage = std::stoul(argv[1]);
-    const double areaMax = std::strtod(argv[2], nullptr);
-    const std::string firlsFile = argv[3];
-    const std::string fir1File = argv[4];
-    const std::string outputFormat = argv[5];
+    std::string milpOption = std::string(argv[1]);
+    const std::int64_t nbStage = std::stoul(argv[2]);
+    const double constraintLimit = std::strtod(argv[3], nullptr);
+    const std::string firlsFile = argv[4];
+    const std::string fir1File = argv[5];
+    const std::string experimentName = argv[6];
+
+    // Select the right problem
+    QuadraticProgram *milp = nullptr;
+    if (milpOption == "--max_rej") {
+        milp = new MaximizeRejection(nbStage, constraintLimit, firlsFile, fir1File, experimentName);
+    }
+    else if (milpOption == "--min_area") {
+        milp = new MinimizeArea(nbStage, constraintLimit, firlsFile, fir1File, experimentName);
+    }
+    else {
+        std::cerr << "'" << milpOption << "' is not a valid option" << std::endl;
+        std::cerr << "Usage:" << std::endl;
+        std::cerr << "\t" << argv[0] << " --max_rej|--min_area NUMBER_STAGE AREA_MAX FIRLS_DATA FIR1_DATA EXPERIMENT_NAME" << std::endl;
+        std::exit(1);
+    }
 
     // Création du répertoire de destination
-    if (!createDirectory(outputFormat)) {
-        std::cerr << "createDirectory(): create '" << outputFormat << "' directory: failed" << std::endl;
+    if (!createDirectory(experimentName)) {
+        std::cerr << "createDirectory(): create '" << experimentName << "' directory: failed" << std::endl;
         std::exit(1);
     }
 
     std::cout << "### Start LP solver... ###" << std::endl;
     try {
-      LinearProgram lp(nbStage, areaMax, firlsFile, fir1File, outputFormat);
-
-      lp.printDebugFile();
-      lp.printResults();
-      lp.printResults("sol.txt");
+      milp->printDebugFiles();
+      milp->printResults();
+      milp->printResults("sol.txt");
 
       TclPRN tcl;
-      tcl.generate(lp, outputFormat);
+      tcl.generate(*milp, experimentName);
 
-      ScriptGenerator::generateDeployScript(lp, outputFormat, "prn");
-      ScriptGenerator::generateSimulationScript(lp, outputFormat);
+      ScriptGenerator::generateDeployScript(*milp, experimentName, "prn");
+      ScriptGenerator::generateSimulationScript(*milp, experimentName);
     } catch (GRBException e) {
-      std::cout << e.getMessage() << std::endl;
+      std::cerr << e.getMessage() << std::endl;
     }
 
+    delete milp;
 
     return 0;
 }

@@ -20,7 +20,7 @@
 
 #include <thread>
 
-void TclPRN::writeTclHeader(std::ofstream &file, const std::string &outputFormat) {
+void TclPRN::writeTclHeader(std::ofstream &file, const std::string &experimentName) {
     file << "variable fpga_ip    $::env(OSC_IMP_IP)" << std::endl;
     file << "variable fpga_dev   $::env(OSC_IMP_DEV)" << std::endl;
     file << std::endl;
@@ -29,7 +29,7 @@ void TclPRN::writeTclHeader(std::ofstream &file, const std::string &outputFormat
     // Part name for Redpitaya
     file << "set part_name xc7z010clg400-1" << std::endl;
 
-    file << "set project_name " << outputFormat << std::endl;
+    file << "set project_name " << experimentName << std::endl;
     file << "set bd_path /tmp/$project_name/$project_name.srcs/sources_1/bd/$project_name" << std::endl;
     file << std::endl;
     file << "# Remove old project" << std::endl;
@@ -109,7 +109,7 @@ void TclPRN::writeTclHeader(std::ofstream &file, const std::string &outputFormat
     file << std::endl;
 }
 
-void TclPRN::writeTclFooter(std::ofstream &file, int inputSize, std::string &previousSource, const std::string &outputFormat) {
+void TclPRN::writeTclFooter(std::ofstream &file, int inputSize, std::string &previousSource, const std::string &experimentName) {
     if (inputSize > 64) {
         file << "# Create Ram shifter block" << std::endl;
         file << "startgroup" << std::endl;
@@ -195,10 +195,10 @@ void TclPRN::writeTclFooter(std::ofstream &file, int inputSize, std::string &pre
 
     file << "# export usage" << std::endl;
     file << "open_run impl_1" << std::endl;
-    file << "report_utilization -hierarchical -hierarchical_depth 2 -file " << outputFormat << "/" << outputFormat << "_usage_ressources.txt" << std::endl;
+    file << "report_utilization -hierarchical -hierarchical_depth 2 -file " << experimentName << "/" << experimentName << "_usage_ressources.txt" << std::endl;
     file << std::endl;
 
     file << "# Copy the bitstream" << std::endl;
-    file << "file copy -force /tmp/" << outputFormat << "/" << outputFormat << ".runs/impl_1/" << outputFormat << "_wrapper.bit " << outputFormat << "/" << outputFormat << "_wrapper.bit" << std::endl;
+    file << "file copy -force /tmp/" << experimentName << "/" << experimentName << ".runs/impl_1/" << experimentName << "_wrapper.bit " << experimentName << "/" << experimentName << "_wrapper.bit" << std::endl;
     file << "exit" << std::endl;
 }

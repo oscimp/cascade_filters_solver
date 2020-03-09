@@ -25,8 +25,8 @@
 
 class TclPRN: public TclProject {
 private:
-    void writeTclHeader(std::ofstream &file, const std::string &outputFormat);
-    void writeTclFooter(std::ofstream &file, int inputSize, std::string &previousSource, const std::string &outputFormat);
+    void writeTclHeader(std::ofstream &file, const std::string &experimentName);
+    void writeTclFooter(std::ofstream &file, int inputSize, std::string &previousSource, const std::string &experimentName);
 };
 
 #endif // TCL_PRN_H

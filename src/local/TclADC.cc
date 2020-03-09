@@ -20,9 +20,9 @@
 
 #include <thread>
 
-#include "LinearProgram.h"
+#include "QuadraticProgram.h"
 
-void TclADC::writeTclHeader(std::ofstream &file, const std::string &outputFormat) {
+void TclADC::writeTclHeader(std::ofstream &file, const std::string &experimentName) {
     file << "variable fpga_ip    $::env(OSC_IMP_IP)" << std::endl;
     file << "variable fpga_dev   $::env(OSC_IMP_DEV)" << std::endl;
     file << std::endl;
@@ -31,7 +31,7 @@ void TclADC::writeTclHeader(std::ofstream &file, const std::string &outputFormat
     // Part name for Redpitaya
     file << "set part_name xc7z010clg400-1" << std::endl;
 
-    file << "set project_name " << outputFormat << std::endl;
+    file << "set project_name " << experimentName << std::endl;
     file << "set bd_path /tmp/$project_name/$project_name.srcs/sources_1/bd/$project_name" << std::endl;
     file << std::endl;
     file << "# Remove old project" << std::endl;
@@ -204,7 +204,7 @@ void TclADC::addTclFir(std::ofstream &file, int firNumber, const SelectedFilter 
     previousSource = "$shifter_" + std::to_string(firNumber) + "/data_out";
 }
 
-void TclADC::writeTclFooter(std::ofstream &file, int inputSize, std::string &previousSource, const std::string &outputFormat) {
+void TclADC::writeTclFooter(std::ofstream &file, int inputSize, std::string &previousSource, const std::string &experimentName) {
     file << "# Connect reset" << std::endl;
     file << "connect_bd_net [get_bd_pins $clocks/adc_rst_i] \\" << std::endl;
     file << "    [get_bd_pins rst_ps7_0_125M/peripheral_reset]" << std::endl;
@@ -292,10 +292,10 @@ void TclADC::writeTclFooter(std::ofstream &file, int inputSize, std::string &pre
 
     file << "# export usage" << std::endl;
     file << "open_run impl_1" << std::endl;
-    file << "report_utilization -hierarchical -hierarchical_depth 1 -file " << outputFormat << "/" << outputFormat << "_usage_ressources.txt" << std::endl;
+    file << "report_utilization -hierarchical -hierarchical_depth 1 -file " << experimentName << "/" << experimentName << "_usage_ressources.txt" << std::endl;
     file << std::endl;
 
     file << "# Copy the bitstream" << std::endl;
-    file << "file copy -force /tmp/" << outputFormat << "/" << outputFormat << ".runs/impl_1/" << outputFormat << "_wrapper.bit " << outputFormat << "/" << outputFormat << "_wrapper.bit" << std::endl;
+    file << "file copy -force /tmp/" << experimentName << "/" << experimentName << ".runs/impl_1/" << experimentName << "_wrapper.bit " << experimentName << "/" << experimentName << "_wrapper.bit" << std::endl;
     file << "exit" << std::endl;
 }
