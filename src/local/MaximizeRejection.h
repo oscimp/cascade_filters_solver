@@ -21,14 +21,38 @@
 
 #include "QuadraticProgram.h"
 
+/**
+ * @brief Quadratic program to maximize rejection
+ *
+ * @see QuadraticProgram
+ */
 class MaximizeRejection: public QuadraticProgram {
 public:
     using QuadraticProgram::printResults;
 
+    /**
+     * @brief Constructor
+     *
+     * @param nbStage Total stage
+     * @param areaMax Area constraint
+     * @param firlsFile Path to firls filters
+     * @param fir1File Path to fir1 filters
+     * @param experimentName Name of experiment
+     */
     MaximizeRejection(const std::int64_t nbStage, const double areaMax, const std::string &firlsFile, const std::string &fir1File, const std::string &experimentName);
 
+    /**
+     * @brief Print the result files
+     *
+     * @param out Output stream
+     */
     const std::vector<SelectedFilter> &getSelectedFilters() const override;
 
+    /**
+     * @brief Print the results to output stream
+     *
+     * @param out Output stream
+     */
     void printResults(std::ostream &out = std::cout) override;
 
 private:

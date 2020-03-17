@@ -23,9 +23,26 @@
 
 class QuadraticProgram;
 
+/**
+ * @brief Utility class to generate scripts
+ */
 class ScriptGenerator {
 public:
+    /**
+     * @brief Generate the shell script to deploy the design on FPGA board
+     *
+     * @param milp The quadratic program
+     * @param experimentName The name of experimentation
+     * @param dtboType The name of dtbo
+     */
     static void generateDeployScript(const QuadraticProgram &milp, const std::string &experimentName, const std::string dtboType);
+
+    /**
+     * @brief Generate the octave simulation script
+     *
+     * @param milp The quadratic program
+     * @param experimentName The name of experimentation
+     */
     static void generateSimulationScript(const QuadraticProgram &milp, const std::string &experimentName);
 
 private:
