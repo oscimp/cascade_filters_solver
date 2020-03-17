@@ -21,14 +21,36 @@
 
 #include "QuadraticProgram.h"
 
+/**
+ * @brief Quadratic program to minimize area
+ *
+ * @see QuadraticProgram
+ */
 class MinimizeArea: public QuadraticProgram {
 public:
     using QuadraticProgram::printResults;
 
+    /**
+     * @brief Constructor
+     *
+     * @param nbStage Total stage
+     * @param rejectionLevel Rejection constraint
+     * @param firlsFile Path to firls filters
+     * @param fir1File Path to fir1 filters
+     * @param experimentName Name of experiment
+     */
     MinimizeArea(const std::int64_t nbStage, const double rejectionLevel, const std::string &firlsFile, const std::string &fir1File, const std::string &experimentName);
 
+    /**
+     * @brief Get the optimal selected filters
+     */
     const std::vector<SelectedFilter> &getSelectedFilters() const override;
 
+    /**
+     * @brief Print the results to output stream
+     *
+     * @param out Output stream
+     */
     void printResults(std::ostream &out = std::cout) override;
 
 private:
