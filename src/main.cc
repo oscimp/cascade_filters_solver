@@ -36,10 +36,10 @@ static bool createDirectory(const std::string &path) {
 
 int main(int argc, char *argv[]) {
     // Vérification des paramètres
-    if (argc != 7) {
+    if (argc != 6) {
         std::cerr << "Missing parameter" << std::endl;
         std::cerr << "Usage:" << std::endl;
-        std::cerr << "\t" << argv[0] << " --max_rej|--min_area NUMBER_STAGE CONSTRAINT_LIMIT FIRLS_DATA FIR1_DATA EXPERIMENT_NAME" << std::endl;
+        std::cerr << "\t" << argv[0] << " --max_rej|--min_area NUMBER_STAGE CONSTRAINT_LIMIT JSON_FILTERS_FILE EXPERIMENT_NAME" << std::endl;
         std::exit(1);
     }
 
@@ -47,17 +47,16 @@ int main(int argc, char *argv[]) {
     std::string milpOption = std::string(argv[1]);
     const std::int64_t nbStage = std::stoul(argv[2]);
     const double constraintLimit = std::strtod(argv[3], nullptr);
-    const std::string firlsFile = argv[4];
-    const std::string fir1File = argv[5];
-    const std::string experimentName = argv[6];
+    const std::string jsonPath = argv[4];
+    const std::string experimentName = argv[5];
 
     // Select the right problem
     QuadraticProgram *milp = nullptr;
     if (milpOption == "--max_rej") {
-        milp = new MaximizeRejection(nbStage, constraintLimit, firlsFile, fir1File, experimentName);
+        milp = new MaximizeRejection(nbStage, constraintLimit, jsonPath, experimentName);
     }
     else if (milpOption == "--min_area") {
-        milp = new MinimizeArea(nbStage, constraintLimit, firlsFile, fir1File, experimentName);
+        milp = new MinimizeArea(nbStage, constraintLimit, jsonPath, experimentName);
     }
     else {
         std::cerr << "'" << milpOption << "' is not a valid option" << std::endl;

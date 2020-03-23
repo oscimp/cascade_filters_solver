@@ -43,7 +43,7 @@ void QuadraticProgram::printResults(const std::string &filename) {
     printResults(file);
 }
 
-void QuadraticProgram::loadFirConfiguration(const std::string &filename, FirMethod method) {
+void QuadraticProgram::loadFirConfiguration(const std::string &filename, const std::string &method) {
     // Open the file
     std::ifstream file(filename, std::ios::binary);
     if (file.fail()) {

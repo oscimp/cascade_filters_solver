@@ -21,17 +21,39 @@
 #include <cassert>
 #include <chrono>
 #include <cmath>
+#include <filesystem>
 #include <iostream>
 
-MaximizeRejection::MaximizeRejection(const std::int64_t nbStage, const double areaMax, const std::string &firlsFile, const std::string &fir1File, const std::string &experimentName)
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+namespace fs = std::filesystem;
+
+MaximizeRejection::MaximizeRejection(const std::int64_t nbStage, const double areaMax, const std::string &jsonPath, const std::string &experimentName)
 : QuadraticProgram(experimentName)
 , m_areaValue(0.0)
 , m_rejectionValue(0.0)
 , m_lastPi(0.0)
 , m_computationTime(0.0) {
-    // Load firls coeffcients
-    loadFirConfiguration(firlsFile, FirMethod::FirLS);
-    loadFirConfiguration(fir1File, FirMethod::Fir1);
+    // Read JSON file to get the filters file loctations
+    std::ifstream jsonFile(jsonPath, std::ios::binary);
+    if (jsonFile.fail()) {
+        std::cerr << "MaximizeRejection::MaximizeRejection: The json file '" << jsonPath << "' is missing" << std::endl;
+        std::exit(-1);
+    }
+
+    // Get relative path
+    fs::path filtersDirectory = fs::path(jsonPath).parent_path();
+
+    // Create an object json
+    json jsonData;
+    jsonFile >> jsonData;
+
+    // Add all filters
+    for (auto& element : jsonData.items()) {
+        std::string filterPath(filtersDirectory.string() + "/" + static_cast<std::string>(element.value()));
+        loadFirConfiguration(filterPath, element.key());
+    }
 
     std::cout << "Total config FIR: " << m_firs.size() << std::endl;
 

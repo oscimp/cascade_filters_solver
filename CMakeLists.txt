@@ -13,7 +13,7 @@ if(NOT DEFINED CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
 endif()
 
 # Set the C++ standard
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -37,6 +37,11 @@ set(CMAKE_MODULE_PATH
 find_package(Gurobi REQUIRED)
 include_directories(${GUROBI_INCLUDE_DIR})
 
+# Add JSON
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+set(JSON_Install OFF CACHE INTERNAL "")
+add_subdirectory(vendor/json)
+
 add_executable(fir-solver
   src/main.cc
   src/local/Fir.cc
@@ -50,5 +55,7 @@ add_executable(fir-solver
 )
 
 target_link_libraries(fir-solver
-  ${GUROBI_LIBRARIES}
+  PRIVATE
+    ${GUROBI_LIBRARIES}
+    nlohmann_json::nlohmann_json
 )

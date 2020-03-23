@@ -98,7 +98,7 @@ protected:
      * @param filename Binary filename
      * @param method Algorithm used to create the coefficients
      */
-    void loadFirConfiguration(const std::string &filename, FirMethod method);
+    void loadFirConfiguration(const std::string &filename, const std::string &method);
 
 protected:
     const std::string m_experimentName;   /*!< Experiment name used to create directory and files */

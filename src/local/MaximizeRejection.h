@@ -35,11 +35,10 @@ public:
      *
      * @param nbStage Total stage
      * @param areaMax Area constraint
-     * @param firlsFile Path to firls filters
-     * @param fir1File Path to fir1 filters
+     * @param jsonPath Path to firls filters
      * @param experimentName Name of experiment
      */
-    MaximizeRejection(const std::int64_t nbStage, const double areaMax, const std::string &firlsFile, const std::string &fir1File, const std::string &experimentName);
+    MaximizeRejection(const std::int64_t nbStage, const double areaMax, const std::string &jsonPath, const std::string &experimentName);
 
     /**
      * @brief Print the result files

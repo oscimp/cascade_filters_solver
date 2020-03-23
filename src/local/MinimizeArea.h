@@ -39,7 +39,7 @@ public:
      * @param fir1File Path to fir1 filters
      * @param experimentName Name of experiment
      */
-    MinimizeArea(const std::int64_t nbStage, const double rejectionLevel, const std::string &firlsFile, const std::string &fir1File, const std::string &experimentName);
+    MinimizeArea(const std::int64_t nbStage, const double rejectionLevel, const std::string &jsonPath, const std::string &experimentName);
 
     /**
      * @brief Get the optimal selected filters
