@@ -5,7 +5,7 @@ project("FIR Solver LP - New version (Gurobi)"
     VERSION 1.0
 )
 
-option(LP_DEBUG "Activate debug build" OFF)
+option(LP_FIX_REJECTION_CONSTRAINT "Activate debug build" OFF)
 
 if(NOT DEFINED CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
   message(STATUS "Setting build type to 'RelWithDebInfo' as none was specified.")
@@ -25,9 +25,8 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL      "-Os -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE         "-O3 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO  "-O2 -g")
 
-if (LP_DEBUG)
-  message(STATUS "Debug: enable")
-  set(CMAKE_BUILD_TYPE Debug)
+if (LP_FIX_REJECTION_CONSTRAINT)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DFIX_REJECTION_CONSTRAINT")
 endif()
 
 set(CMAKE_MODULE_PATH

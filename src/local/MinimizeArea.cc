@@ -180,13 +180,14 @@ MinimizeArea::MinimizeArea(const std::int64_t nbStage, const double rejectionLev
             // Pour prendre en compte le bit de signe
             expr += 1;
 
-            // TROP LENT !
-            // // Pour prendre en compte le bit de signe - si un filtre est séléctionné
-            // GRBLinExpr sum_delta = 0;
-            // for (std::int64_t j = 0; j < NbConfFir; ++j) {
-            //   sum_delta += m_var_delta[i][j];
-            // }
-            // expr += sum_delta;
+#ifdef FIX_REJECTION_CONSTRAINT
+            // Pour prendre en compte le bit de signe - si un filtre est séléctionné
+            GRBLinExpr sum_delta = 0;
+            for (std::int64_t j = 0; j < NbConfFir; ++j) {
+              sum_delta += m_var_delta[i][j];
+            }
+            expr += sum_delta;
+#endif
         }
 
         // Ajout d'un bit de sécurité (Utile ?)
