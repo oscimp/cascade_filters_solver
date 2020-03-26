@@ -16,6 +16,7 @@ find_library(GUROBI_C_LIBRARY
     NAMES
         gurobi
         gurobi80
+        gurobi90
     HINTS $ENV{GUROBI_HOME}
     PATH_SUFFIXES lib lib64
 )
@@ -32,7 +33,7 @@ find_library(GUROBI_CXX_LIBRARY
     PATH_SUFFIXES lib lib64
 )
 
-set(GUROBI_LIBRARIES "${GUROBI_C_LIBRARY};${GUROBI_CXX_LIBRARY}" )
+set(GUROBI_LIBRARIES "${GUROBI_CXX_LIBRARY};${GUROBI_C_LIBRARY}" )
 
 # Did we find everything we need?
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GUROBI DEFAULT_MSG
