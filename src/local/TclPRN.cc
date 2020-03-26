@@ -21,8 +21,7 @@
 #include <thread>
 
 void TclPRN::writeTclHeader(std::ofstream &file, const std::string &experimentName) {
-    file << "variable fpga_ip    $::env(OSC_IMP_IP)" << std::endl;
-    file << "variable fpga_dev   $::env(OSC_IMP_DEV)" << std::endl;
+    file << "variable fpga_ip    $::env(OSCIMP_DIGITAL_IP)" << std::endl;
     file << std::endl;
     file << "# Defines useful variable" << std::endl;
 
@@ -30,14 +29,14 @@ void TclPRN::writeTclHeader(std::ofstream &file, const std::string &experimentNa
     file << "set part_name xc7z010clg400-1" << std::endl;
 
     file << "set project_name " << experimentName << std::endl;
-    file << "set bd_path /tmp/$project_name/$project_name.srcs/sources_1/bd/$project_name" << std::endl;
+    file << "set bd_path ./tmp/$project_name.srcs/sources_1/bd/$project_name" << std::endl;
+    file << "set repo_path $fpga_ip" << std::endl;
     file << std::endl;
     file << "# Remove old project" << std::endl;
-    file << "file delete -force /tmp/$project_name" << std::endl;
+    file << "file delete -force ./tmp/" << std::endl;
     file << std::endl;
     file << "# Create the project" << std::endl;
-    file << "create_project $project_name /tmp/$project_name -part $part_name" << std::endl;
-    // file << "set_property BOARD_PART em.avnet.com:zed:part0:1.3 [current_project]" << std::endl;
+    file << "create_project $project_name ./tmp/ -part $part_name" << std::endl;
     file << std::endl;
     file << "# create bd" << std::endl;
     file << "create_bd_design $project_name" << std::endl;
@@ -49,7 +48,6 @@ void TclPRN::writeTclHeader(std::ofstream &file, const std::string &experimentNa
 
     file << "# Create PS7" << std::endl;
     file << "startgroup" << std::endl;
-    file << "set preset_name $fpga_dev/redpitaya/redpitaya_preset.xml" << std::endl;
     file << "    # processing_system7_0, and set properties" << std::endl;
     file << "    set ps7 [ create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7:5.5 processing_system7_0 ]" << std::endl;
     file << "    set_property -dict [ list \\" << std::endl;
@@ -65,7 +63,7 @@ void TclPRN::writeTclHeader(std::ofstream &file, const std::string &experimentNa
     file << "save_bd_design" << std::endl;
     file << std::endl;
 
-    file << "# Create PNR block" << std::endl;
+    file << "# Create PRN block" << std::endl;
     file << "startgroup" << std::endl;
     file << "   set prn [ create_bd_cell -type ip -vlnv ggm:cogen:prn20b:1.0 prn20b_0 ]" << std::endl;
     file << "   apply_bd_automation -rule xilinx.com:bd_rule:axi4 \\" << std::endl;
@@ -76,7 +74,7 @@ void TclPRN::writeTclHeader(std::ofstream &file, const std::string &experimentNa
     file << "endgroup" << std::endl;
     file << std::endl;
 
-    file << "# Create PNR shifter for the PRN data" << std::endl;
+    file << "# Create PRN shifter for the PRN data" << std::endl;
     file << "startgroup" << std::endl;
     file << "   set shifter_prn_data [ create_bd_cell -type ip -vlnv ggm:cogen:shifterReal:1.0 shifterReal_0 ]" << std::endl;
     file << "   set_property -dict [list CONFIG.DATA_OUT_SIZE {16} CONFIG.DATA_IN_SIZE {20}] $shifter_prn_data" << std::endl;
@@ -92,7 +90,7 @@ void TclPRN::writeTclHeader(std::ofstream &file, const std::string &experimentNa
     file << "endgroup" << std::endl;
     file << std::endl;
 
-    file << "# Create PNR expander for raw data" << std::endl;
+    file << "# Create PRN expander for raw data" << std::endl;
     file << "startgroup" << std::endl;
     file << "   set expander_prn_raw_data [ create_bd_cell -type ip -vlnv ggm:cogen:expanderReal:1.0 expanderReal_0 ]" << std::endl;
     file << "   set_property -dict [list CONFIG.DATA_IN_SIZE {16} CONFIG.DATA_OUT_SIZE {64}] $expander_prn_raw_data" << std::endl;
@@ -135,25 +133,28 @@ void TclPRN::writeTclFooter(std::ofstream &file, int inputSize, std::string &pre
 
     file << "# Create Ram block for processed data" << std::endl;
     file << "startgroup" << std::endl;
-    file << "   set ram_fir [create_bd_cell -type ip -vlnv ggm:cogen:data64_1_voie_to_ram:1.0 data64_1_voie_to_ram_0]" << std::endl;
+// JMF PROBLEME
+    file << "   set ram_fir [create_bd_cell -type ip -vlnv ggm:cogen:dataReal_to_ram:1.0 dataReal_to_ram_0]" << std::endl;
+    file << "   set_property -dict [list CONFIG.NB_INPUT {1} CONFIG.DATA_SIZE {64} CONFIG.NB_SAMPLE {4096}] $ram_fir " << std::endl;
     file << "   apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { \\" << std::endl;
     file << "       Clk_master {/processing_system7_0/FCLK_CLK0 (125 MHz)} Clk_slave {Auto}\\" << std::endl;
     file << "       Clk_xbar {/processing_system7_0/FCLK_CLK0 (125 MHz)}\\" << std::endl;
-    file << "       Master {/processing_system7_0/M_AXI_GP0} Slave {/data64_1_voie_to_ram_0/s00_axi}\\" << std::endl;
+    file << "       Master {/processing_system7_0/M_AXI_GP0} Slave {/dataReal_to_ram_0/s00_axi}\\" << std::endl;
     file << "       intc_ip {/ps7_0_axi_periph} master_apm {0}}  [get_bd_intf_pins $ram_fir/s00_axi]" << std::endl;
-    file << "   connect_bd_intf_net [get_bd_intf_pins $ram_fir/data_in] [get_bd_intf_pins " << previousSource << "]" << std::endl;
+    file << "   connect_bd_intf_net [get_bd_intf_pins $ram_fir/data1_in] [get_bd_intf_pins " << previousSource << "]" << std::endl;
     file << "endgroup" << std::endl;
     file << std::endl;
 
     file << "# Create Ram block for raw data" << std::endl;
     file << "startgroup" << std::endl;
-    file << "   set ram_prn [create_bd_cell -type ip -vlnv ggm:cogen:data64_1_voie_to_ram:1.0 data64_1_voie_to_ram_1]" << std::endl;
+    file << "   set ram_prn [create_bd_cell -type ip -vlnv ggm:cogen:dataReal_to_ram:1.0 dataReal_to_ram_1]" << std::endl;
+    file << "   set_property -dict [list CONFIG.NB_INPUT {1} CONFIG.DATA_SIZE {64} CONFIG.NB_SAMPLE {4096}] $ram_prn " << std::endl;
     file << "   apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { \\" << std::endl;
     file << "       Clk_master {/processing_system7_0/FCLK_CLK0 (125 MHz)} Clk_slave {Auto}\\" << std::endl;
     file << "       Clk_xbar {/processing_system7_0/FCLK_CLK0 (125 MHz)}\\" << std::endl;
-    file << "       Master {/processing_system7_0/M_AXI_GP0} Slave {/data64_1_voie_to_ram_1/s00_axi}\\" << std::endl;
+    file << "       Master {/processing_system7_0/M_AXI_GP0} Slave {/dataReal_to_ram_1/s00_axi}\\" << std::endl;
     file << "       intc_ip {/ps7_0_axi_periph} master_apm {0}}  [get_bd_intf_pins $ram_prn/s00_axi]" << std::endl;
-    file << "   connect_bd_intf_net [get_bd_intf_pins $ram_prn/data_in] [get_bd_intf_pins $expander_prn_raw_data/data_out]" << std::endl;
+    file << "   connect_bd_intf_net [get_bd_intf_pins $ram_prn/data1_in] [get_bd_intf_pins $expander_prn_raw_data/data_out]" << std::endl;
     file << "endgroup" << std::endl;
     file << std::endl;
 
@@ -195,10 +196,10 @@ void TclPRN::writeTclFooter(std::ofstream &file, int inputSize, std::string &pre
 
     file << "# export usage" << std::endl;
     file << "open_run impl_1" << std::endl;
-    file << "report_utilization -hierarchical -hierarchical_depth 2 -file " << experimentName << "/" << experimentName << "_usage_ressources.txt" << std::endl;
+    file << "report_utilization -hierarchical -hierarchical_depth 2 -file ./tmp/" << experimentName << "_usage_ressources.txt" << std::endl;
     file << std::endl;
 
     file << "# Copy the bitstream" << std::endl;
-    file << "file copy -force /tmp/" << experimentName << "/" << experimentName << ".runs/impl_1/" << experimentName << "_wrapper.bit " << experimentName << "/" << experimentName << "_wrapper.bit" << std::endl;
+    file << "file copy -force ./tmp/" << experimentName << ".runs/impl_1/" << experimentName << "_wrapper.bit " << "./" << experimentName << "_wrapper.bit" << std::endl;
     file << "exit" << std::endl;
 }
