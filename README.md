@@ -48,7 +48,7 @@ make
 ```
 # To maximize rejection
 # ./fir-solver NUMBER_STAGE AREA_MAX FILTERS_JSON OUTPUT_FORMAT
-./fir-solver --max-rej 5 500 ../fir_data/filters.json example
+./fir-solver --max_rej 5 500 ../fir_data/filters.json example
 ```
 Will produce the results into example folder for 5 stages of filters with 500 a.u. of area.
 
@@ -56,7 +56,7 @@ Will produce the results into example folder for 5 stages of filters with 500 a.
 ```
 # To minimize area
 # ./fir-solver NUMBER_STAGE REJECTION_MIN FILTERS_JSON OUTPUT_FORMAT
-./fir-solver --min-area  5 80 ../fir_data/filters.json example
+./fir-solver --min_area  5 80 ../fir_data/filters.json example
 ```
 Will be produce the results into example folder for 5 stages of filters with 80 dB of rejection.
 
