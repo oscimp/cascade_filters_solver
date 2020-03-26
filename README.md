@@ -48,21 +48,29 @@ make
 ```
 # To maximize rejection
 # ./fir-solver NUMBER_STAGE AREA_MAX FILTERS_JSON OUTPUT_FORMAT
-./fir-solver --max_rej 5 500 ../fir_data/filters.json example
+./fir-solver --max_rej 3 500 ../fir_data/filters.json example
 ```
-Will produce the results into example folder for 5 stages of filters with 500 a.u. of area.
+Will produce the results into example folder for 3 stages of filters with 500 a.u. of area.
 
 
 ```
 # To minimize area
 # ./fir-solver NUMBER_STAGE REJECTION_MIN FILTERS_JSON OUTPUT_FORMAT
-./fir-solver --min_area  5 80 ../fir_data/filters.json example
+./fir-solver --min_area 3 80 ../fir_data/filters.json example
 ```
-Will be produce the results into example folder for 5 stages of filters with 80 dB of rejection.
+Will be produce the results into example folder for 3 stages of filters with 80 dB of rejection.
+
+The resuting files are
+```sh
+example.m example.sh example.tcl gurobi.lp sol.txt
+```
+with most significantly the Vivado tcl script for synthesizing the resulting FIR cascade using the 
+OscimpDigital tools, the GNU/Octave file for simulating the filter cascade behaviour, and
+the bash script for automating the synthesis and running the resulting bitstream on a 14-bit
+Red Pitaya.
 
 ## Notes
-- Our solver can be produce some wrong
-results when the optimal number of stages is lower than the limits. Just take the best
-previous solution.
+- The solver can produce some pessimistic result when the optimal number of stages is lower 
+than the upper limit of considered stages. In such a case, take the best previous solution.
 You can also compile our project with LP_FIX_REJECTION_CONSTRAINT option but the solver will
 be twice slower.
