@@ -9,12 +9,14 @@ include(FindPackageHandleStandardArgs)
 # Search for the header file
 find_path(GUROBI_INCLUDE_DIR
     NAMES gurobi_c++.h
+    HINTS $ENV{GUROBI_HOME}
     PATH_SUFFIXES include gurobi
 )
 find_library(GUROBI_C_LIBRARY
     NAMES
         gurobi
         gurobi80
+    HINTS $ENV{GUROBI_HOME}
     PATH_SUFFIXES lib lib64
 )
 
@@ -26,6 +28,7 @@ find_library(GUROBI_CXX_LIBRARY
         libgurobi_g++4.2.a
         libgurobi_g++5.2
         libgurobi_g++5.2.a
+    HINTS $ENV{GUROBI_HOME}
     PATH_SUFFIXES lib lib64
 )
 
