@@ -58,3 +58,6 @@ target_link_libraries(fir-solver
     ${GUROBI_LIBRARIES}
     nlohmann_json::nlohmann_json
 )
+
+# Add tool
+add_subdirectory(tools/cascaded_filters)
