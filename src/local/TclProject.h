@@ -39,6 +39,8 @@ public:
     void generate(const QuadraticProgram &milp, const std::string &experimentName);
 
 protected:
+    void writeMakefile(std::ofstream &file, const std::string &experimentName);
+
     /**
      * @brief Create the TCL file
      *

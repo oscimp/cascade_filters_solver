@@ -24,6 +24,11 @@
 
 #include "QuadraticProgram.h"
 
+void TclProject::writeMakefile(std::ofstream &file, const std::string &experimentName)
+{   file << "NAME=" << experimentName << std::endl;
+    file << "BASE_TCL = ${NAME}.tcl" << std::endl;
+    file << "include ${OSCIMP_DIGITAL_IP}/xilinx.mk" << std::endl;
+}
 
 void TclProject::generate(const QuadraticProgram &milp, const std::string &experimentName) {
     // We generate the tcl file
@@ -31,6 +36,11 @@ void TclProject::generate(const QuadraticProgram &milp, const std::string &exper
 }
 
 void TclProject::generateProjectFile(const QuadraticProgram &milp, const std::string &experimentName) {
+    // Create the Makefile
+    std::string makeFilename = experimentName + "/Makefile";
+    std::ofstream filem(makeFilename);
+    writeMakefile(filem, experimentName);
+
     // Create the file
     std::string scriptFilename = experimentName + "/" + experimentName + ".tcl";
     std::ofstream file(scriptFilename);
