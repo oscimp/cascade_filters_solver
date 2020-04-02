@@ -19,6 +19,8 @@ function rejection = rejection_criterion(log_data, fc)
     rejection = worst_band + worst_rejection;
 endfunction
 
+gabarit = [0 0.45 0.55 1];
+point = [1 1 0 0];
 numberCoeff = [3:2:60];
 numberBit = [2:22];
 fc = 0.5;
@@ -32,7 +34,7 @@ for it_coeff = 1:length(numberCoeff)
     n_coeff = numberCoeff(it_coeff);
 
     % Generate the float coefficients
-    b = fir1(n_coeff - 1, fc);
+    b = firls(n_coeff - 2, gabarit, point);
 
     % For all bit
     for it_nob = 1:length(numberBit)
