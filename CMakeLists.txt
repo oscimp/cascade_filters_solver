@@ -6,6 +6,7 @@ project("FIR Solver LP - New version (Gurobi)"
 )
 
 option(LP_FIX_REJECTION_CONSTRAINT "Activate debug build" OFF)
+option(LP_TOOLS "Activate tools build" OFF)
 
 if(NOT DEFINED CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
   message(STATUS "Setting build type to 'RelWithDebInfo' as none was specified.")
@@ -60,4 +61,6 @@ target_link_libraries(fir-solver
 )
 
 # Add tool
-add_subdirectory(tools/cascaded_filters)
+if (LP_TOOLS)
+  add_subdirectory(tools/cascaded_filters)
+endif()

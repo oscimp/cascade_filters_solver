@@ -5,6 +5,7 @@ function has been computed for each filter (number of coefficients and number of
 describing each coefficient), then the software will identify the optimum set of filters meeting a target, either of performance or resource usage.
 
 ## Dependency
+- [Digital Signal Processing Simulator](https://github.com/oscimp/libdsps) *Only for build tools*
 - [Gurobi](https://www.gurobi.com/) v8.0.1 & 9.0.1
 
 As described at https://www.gurobi.com/documentation/8.1/quickstart_linux/software_installation_guid.html, define the appropriate environment variables:
@@ -33,6 +34,7 @@ We provide the GNU Octave scripts to generate our filters coefficients in [tools
 
 ## CMake option
 - LP_FIX_REJECTION_CONSTRAINT: Fix the rejection constraints (see Notes).
+- LP_TOOLS: Compile the tool to simulate a cascaded filter
 
 ## Compilation
 ```sh
@@ -64,13 +66,13 @@ The resuting files are
 ```sh
 example.m example.sh example.tcl gurobi.lp sol.txt
 ```
-with most significantly the Vivado tcl script for synthesizing the resulting FIR cascade using the 
+with most significantly the Vivado tcl script for synthesizing the resulting FIR cascade using the
 OscimpDigital tools, the GNU/Octave file for simulating the filter cascade behaviour, and
 the bash script for automating the synthesis and running the resulting bitstream on a 14-bit
 Red Pitaya.
 
 ## Notes
-- The solver can produce some pessimistic result when the optimal number of stages is lower 
+- The solver can produce some pessimistic result when the optimal number of stages is lower
 than the upper limit of considered stages. In such a case, take the best previous solution.
 You can also compile our project with LP_FIX_REJECTION_CONSTRAINT option but the solver will
 be twice slower.
