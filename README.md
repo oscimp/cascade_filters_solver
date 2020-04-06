@@ -6,7 +6,7 @@ describing each coefficient), then the software will identify the optimum set of
 
 ## Dependency
 - [Digital Signal Processing Simulator](https://github.com/oscimp/libdsps) *Only for build tools*
-- [Gurobi](https://www.gurobi.com/) v8.0.1 & 9.0.1
+- [Gurobi](https://www.gurobi.com/) v8.0.1 & 9.0.1 (Download and Licences: Gurobi Optimizer)
 
 As described at https://www.gurobi.com/documentation/8.1/quickstart_linux/software_installation_guid.html, define the appropriate environment variables:
 
